@@ -245,9 +245,10 @@ function love.load()
   state.blue = love.graphics.newCanvas(100, 100)
   state.green = love.graphics.newCanvas(100, 100)
 
-  state.layers[1] = state.red
+  state.layers[1] = assets.maps.test1.image
+  -- state.layers[1] = state.red
   lume.push(state.layers,
-            {content = state.blue, center = {0.5, 0.5}, radius = 0.3},
+            {content = assets.maps.test2.image, center = {0.5, 0.5}, radius = 0.3},
             {content = state.green, center = {0.75, 0.75}, radius = 0.1},
             {content = state.blue, center = {0.85, 0.85}, radius = 0.1}
   )
@@ -293,7 +294,7 @@ function love.draw()
 
   love.graphics.push()
   love.graphics.translate(screen_width / 2, screen_height / 2)
-  love.graphics.scale(3)
+  -- love.graphics.scale(3)
   love.graphics.translate(
     math.floor(-state.player.x - state.player.width / 2 + 0.5),
     math.floor(-state.player.y - state.player.height / 2 + 0.5))
