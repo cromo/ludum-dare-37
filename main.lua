@@ -128,7 +128,9 @@ local function key_tribool(negative, positive)
   }
 end
 
-state = {}
+state = {
+  time = 0,
+}
 state.emitters = {
   delta_time = live.Emitter.new(update),
   raw_key_pressed = live.Emitter.new(pressed_raw),
@@ -201,7 +203,23 @@ state.machines = {
         {update, nil, player.update, playing}
       }
     },
-  }
+  },
+}
+state.layers = {
+  draw = function(self)
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.draw(self[1])
+    for i, layer in ipairs(self) do
+      if i ~= 1 then
+        local pinch = assets.pinch
+        love.graphics.setShader(pinch)
+        pinch:send('center', layer.center)
+        pinch:send('radius', layer.radius)
+        pinch:send('t', state.time)
+        love.graphics.draw(layer.content)
+      end
+    end
+  end
 }
 
 local tiles
@@ -225,10 +243,20 @@ function love.load()
   tiles = sprites.Sprite.new(assets.starting_tiles)
   state.red = love.graphics.newCanvas(100, 100)
   state.blue = love.graphics.newCanvas(100, 100)
+  state.green = love.graphics.newCanvas(100, 100)
+
+  state.layers[1] = state.red
+  lume.push(state.layers,
+            {content = state.blue, center = {0.5, 0.5}, radius = 0.3},
+            {content = state.green, center = {0.75, 0.75}, radius = 0.1},
+            {content = state.blue, center = {0.85, 0.85}, radius = 0.1}
+  )
 end
 
 function love.update(dt)
   require("lovebird").update()
+
+  state.time = state.time + dt
 
   state.emitters.delta_time:emit(dt)
   live.EventQueue.pump{
@@ -260,6 +288,8 @@ function love.draw()
   state.red:renderTo(function() love.graphics.rectangle('fill', 0, 0, 100, 100) end)
   love.graphics.setColor(0, 0, 255)
   state.blue:renderTo(function() love.graphics.rectangle('fill', 0, 0, 100, 100) end)
+  love.graphics.setColor(0, 128, 0)
+  state.green:renderTo(function() love.graphics.rectangle('fill', 0, 0, 100, 100) end)
 
   love.graphics.push()
   love.graphics.translate(screen_width / 2, screen_height / 2)
@@ -274,14 +304,7 @@ function love.draw()
   love.graphics.print("Hello, LD37")
   tiles:draw()
 
-
-  love.graphics.setColor(255, 255, 255)
-  love.graphics.draw(state.red, 20, 20)
-  local pinch = assets.pinch
-  love.graphics.setShader(pinch)
-  pinch:send('center', {0.5, 0.5})
-  pinch:send('radius', 0.3)
-  love.graphics.draw(state.blue, 30, 30)
+  state.layers:draw()
 
   love.graphics.setColor(255, 255, 255)
   love.graphics.setShader()
