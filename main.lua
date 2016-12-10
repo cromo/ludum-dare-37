@@ -1,20 +1,10 @@
 local sprites = require 'sprites'
 local assets = require 'assets'
 local live = require 'live'
+local lume = require 'lume'
 
-local function is_equal(key)
-  return function(state, k)
-    return key == k
-  end
-end
-
-local is_key = is_equal
-
-local function emit(emitter, data)
-  return function()
-    return emitter:emit(data)
-  end
-end
+local f = lume.lambda
+local trace = lume.trace
 
 local update = 'dt'
 local pressed_raw = 'raw_key_pressed'
@@ -33,6 +23,76 @@ local left = 'left'
 local right = 'right'
 
 local neutral = 'neutral'
+
+local player = {
+  x = 0,
+  y = 0,
+  direction = {},
+  movement = {
+    horizontal = {},
+    vertical = {}
+  },
+  update = function(self, dt)
+    local horizontal = self.movement.horizontal.state.name
+    local vertical = self.movement.vertical.state.name
+
+    local direction_contribution = {
+      left = -1, right = 1,
+      up = -1, down = 1,
+      neutral = 0
+    }
+
+    local position_delta = {
+      x = direction_contribution[horizontal],
+      y = direction_contribution[vertical]
+    }
+
+    local distance = lume.distance(0, 0, position_delta.x, position_delta.y)
+    if 0 < distance then
+      position_delta = lume.map(position_delta, function(i) return i / distance end)
+    end
+
+    local speed = 40
+    self.x = self.x + position_delta.x * speed * dt
+    self.y = self.y + position_delta.y * speed * dt
+  end,
+  draw = function(self)
+    local x, y = self.x, self.y
+    local direction = self.direction.state.name
+    local main_image = assets['ghost-' .. direction]
+    local player = sprites.Sprite.new(main_image)
+
+    local hand_direction = direction
+    if hand_direction == up then
+      hand_direction = down
+    end
+    local hands_image = assets['hands-' .. hand_direction]
+    local hands = sprites.Sprite.new(hands_image)
+
+    local hands_behind = direction == up
+    if hands_behind then
+      hands:draw(x, y - 1)
+    end
+    player:draw(x, y)
+    if not hands_behind then
+      hands:draw(x, y)
+    end
+  end
+}
+
+local function is_equal(key)
+  return function(state, k)
+    return key == k
+  end
+end
+
+local is_key = is_equal
+
+local function emit(emitter, data)
+  return function()
+    return emitter:emit(data)
+  end
+end
 
 local function key_tribool(negative, positive)
   local direction = state.emitters.direction
@@ -129,6 +189,15 @@ state.machines = {
       }
     },
   },
+  player = live.StateMachine.new_from_table{
+    {nil, playing},
+    {
+      playing,
+      {
+        {update, nil, player.update, playing}
+      }
+    },
+  }
 }
 
 local tiles
@@ -137,16 +206,10 @@ function love.load()
   assets.register('frag', love.graphics.newShader)
   assets.load('assets')
 
-  local player = {
-    direction = {},
-    movement = {
-      horizontal = {},
-      vertical = {}
-    },
-  }
   state.machines.player_horizontal:initialize_state(player.movement.horizontal)
   state.machines.player_vertical:initialize_state(player.movement.vertical)
   state.machines.player_direction:initialize_state(player.direction)
+  state.machines.player:initialize_state(player)
   state.player = player
 
   local game = {}
@@ -167,6 +230,7 @@ function love.update(dt)
     state.player.movement.horizontal,
     state.player.movement.vertical,
     state.player.direction,
+    state.player,
   }
 end
 
@@ -199,4 +263,8 @@ function love.draw()
   pinch:send('center', {0.5, 0.5})
   pinch:send('radius', 0.3)
   love.graphics.draw(state.blue, 30, 30)
+
+  love.graphics.setColor(255, 255, 255)
+  love.graphics.setShader()
+  state.player:draw()
 end
