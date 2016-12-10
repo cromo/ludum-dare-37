@@ -27,6 +27,8 @@ local neutral = 'neutral'
 local player = {
   x = 0,
   y = 0,
+  width = 16,
+  height = 16,
   direction = {},
   movement = {
     horizontal = {},
@@ -58,6 +60,8 @@ local player = {
   end,
   draw = function(self)
     local x, y = self.x, self.y
+    x = math.floor(x + 0.5)
+    y = math.floor(y + 0.5)
     local direction = self.direction.state.name
     local main_image = assets['ghost-' .. direction]
     local player = sprites.Sprite.new(main_image)
@@ -202,6 +206,8 @@ state.machines = {
 
 local tiles
 function love.load()
+  love.graphics.setDefaultFilter('nearest', 'nearest')
+
   assets.register('png', sprites.Sheet.load)
   assets.register('frag', love.graphics.newShader)
   assets.load('assets')
@@ -246,15 +252,28 @@ function love.keyreleased(key)
 end
 
 function love.draw()
-  love.graphics.setColor(255, 255, 255)
-  love.graphics.setShader()
-  love.graphics.print("Hello, LD37")
-  tiles:draw()
+  local screen_width, screen_height = love.graphics.getDimensions()
+  local mid_x, mid_y = screen_width / 2, screen_height / 2
 
+  -- TODO: remove these when we get actual layers to play with
   love.graphics.setColor(255, 0, 0)
   state.red:renderTo(function() love.graphics.rectangle('fill', 0, 0, 100, 100) end)
   love.graphics.setColor(0, 0, 255)
   state.blue:renderTo(function() love.graphics.rectangle('fill', 0, 0, 100, 100) end)
+
+  love.graphics.push()
+  love.graphics.translate(screen_width / 2, screen_height / 2)
+  love.graphics.scale(3)
+  love.graphics.translate(
+    math.floor(-state.player.x - state.player.width / 2 + 0.5),
+    math.floor(-state.player.y - state.player.height / 2 + 0.5))
+
+  love.graphics.setColor(255, 255, 255)
+  love.graphics.setShader()
+
+  love.graphics.print("Hello, LD37")
+  tiles:draw()
+
 
   love.graphics.setColor(255, 255, 255)
   love.graphics.draw(state.red, 20, 20)
@@ -267,4 +286,9 @@ function love.draw()
   love.graphics.setColor(255, 255, 255)
   love.graphics.setShader()
   state.player:draw()
+
+  love.graphics.pop()
+
+  -- love.graphics.line(mid_x, 0, mid_x, screen_height)
+  -- love.graphics.line(0, mid_y, screen_width, mid_y)
 end
