@@ -203,9 +203,23 @@ function love.load()
   assets.register('lua', function(path) return sti.new(path, {'box2d'}) end)
   assets.load('assets')
 
-  state.world = love.physics.newWorld(0, 0, false)
-  state.map = assets["test1"]
-  state.map:box2d_init(state.world)
+  state.planes = {}
+  state.planes.volcano = {
+    map_name = "test1",
+    color = {255,0,0}
+  }
+  state.planes.mansion = {
+    map_name = "test2",
+    color = {128,128,128}
+  }
+
+  for name, plane in pairs(state.planes) do
+    plane.world = love.physics.newWorld(0, 0, false)
+    plane.map = assets[plane.map_name]
+    plane.map:box2d_init(plane.world)
+  end
+
+  player.plane = state.planes.volcano
 
   player:init()
   state.player = player
@@ -245,7 +259,9 @@ function love.update(dt)
   state.camera.y = state.camera.y *
     (1.0 - follow_weight) + player.y * follow_weight
 
-  state.world:update(dt)
+  for _, plane in pairs(state.planes) do
+    plane.world:update(dt)
+  end
 end
 
 function love.keypressed(key, scancode, is_repeat)
@@ -260,17 +276,21 @@ function love.keyreleased(key)
 end
 
 function debug_physics(world)
-  for _, body in pairs(world:getBodyList()) do
-    for _, fixture in pairs(body:getFixtureList()) do
-      local shape = fixture:getShape()
-      if shape:getType() == "circle" then
-        local pos_x, pos_y = body:getWorldPoint(shape:getPoint())
-        love.graphics.circle('line', pos_x, pos_y, shape:getRadius())
-      else
-        love.graphics.polygon('line', body:getWorldPoints(shape:getPoints()))
+  for _, plane in pairs(state.planes) do
+    for _, body in pairs(plane.world:getBodyList()) do
+      for _, fixture in pairs(body:getFixtureList()) do
+        local shape = fixture:getShape()
+        love.graphics.setColor(plane.color)
+        if shape:getType() == "circle" then
+          local pos_x, pos_y = body:getWorldPoint(shape:getPoint())
+          love.graphics.circle('line', pos_x, pos_y, shape:getRadius())
+        else
+          love.graphics.polygon('line', body:getWorldPoints(shape:getPoints()))
+        end
       end
     end
   end
+  love.graphics.setColor(255, 255, 255)
 end
 
 function love.draw()

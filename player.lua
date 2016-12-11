@@ -31,7 +31,7 @@ local player = {
     state.machines.player:initialize_state(self)
 
     -- Setup a physics body for our lovely ghost
-    self.body = love.physics.newBody(state.world, 32, 32, "dynamic")
+    self.body = love.physics.newBody(self.plane.world, 32, 32, "dynamic")
     self.body:setFixedRotation(true)
     local origin_point = love.physics.newCircleShape(8, 12, 6.0)
     self.fixture = love.physics.newFixture(self.body, origin_point, 1)
