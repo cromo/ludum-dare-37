@@ -99,7 +99,7 @@ state.machines = {
         {released_raw, is_key(down), emit(state.emitters.key_released, down), playing},
         {released_raw, is_key(left), emit(state.emitters.key_released, left), playing},
         {released_raw, is_key(right), emit(state.emitters.key_released, right), playing},
-        {pressed_raw, is_key 'space', function() pinch_layer('mansion', state.player.x, state.player.y, 60) end},
+        {pressed_raw, is_key 'space', function() pinch_layer(state.planes.mansion, state.player.x, state.player.y, 60) end},
         {pressed_raw, is_key 'k', function() release_pinch(#state.layers) end},
         {pressed_raw, is_key '1', function() state.player:switch_to_plane(state.planes.volcano) end},
         {pressed_raw, is_key '2', function() state.player:switch_to_plane(state.planes.mansion) end},
@@ -156,7 +156,7 @@ state.machines = {
 state.layers = {
   draw = function(self)
     love.graphics.setColor(255, 255, 255)
-    love.graphics.draw(self[1])
+    love.graphics.draw(self[1].prerender)
     for i, layer in ipairs(self) do
       if i ~= 1 then
         local center = {
@@ -177,7 +177,8 @@ state.layers = {
 
 function pinch_layer(target, x, y, radius)
   local layer = {
-    content = state.planes[target].prerender,
+    plane = target,
+    content = target.prerender,
     center = {x, y},
     radius = 1,
     type = "layer"
@@ -207,6 +208,7 @@ function release_pinch(number)
       table.remove(state.layers, number)
   end)
 
+  layer.fixture:destroy()
 end
 
 function world_begin_contact(a, b, coll)
@@ -287,7 +289,7 @@ function love.load()
   state.machines.game:initialize_state(game)
   state.game = game
 
-  state.layers[1] = assets.maps.test1.image
+  state.layers[1] = player.plane
 
   state.camera = {x=0, y=0}
 end
