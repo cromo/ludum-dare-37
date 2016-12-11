@@ -4,6 +4,8 @@ local live = require 'live'
 local lume = require 'lume'
 local flux = require 'flux'
 
+local player = require("player")
+
 local f = lume.lambda
 local trace = lume.trace
 
@@ -24,66 +26,6 @@ local left = 'left'
 local right = 'right'
 
 local neutral = 'neutral'
-
-local player = {
-  x = 0,
-  y = 0,
-  width = 16,
-  height = 16,
-  direction = {},
-  movement = {
-    horizontal = {},
-    vertical = {}
-  },
-  update = function(self, dt)
-    local horizontal = self.movement.horizontal.state.name
-    local vertical = self.movement.vertical.state.name
-
-    local direction_contribution = {
-      left = -1, right = 1,
-      up = -1, down = 1,
-      neutral = 0
-    }
-
-    local position_delta = {
-      x = direction_contribution[horizontal],
-      y = direction_contribution[vertical]
-    }
-
-    local distance = lume.distance(0, 0, position_delta.x, position_delta.y)
-    if 0 < distance then
-      position_delta = lume.map(position_delta, function(i) return i / distance end)
-    end
-
-    local speed = 40
-    self.x = self.x + position_delta.x * speed * dt
-    self.y = self.y + position_delta.y * speed * dt
-  end,
-  draw = function(self)
-    local x, y = self.x, self.y
-    x = math.floor(x + 0.5)
-    y = math.floor(y + 0.5)
-    local direction = self.direction.state.name
-    local main_image = assets['ghost-' .. direction]
-    local player = sprites.Sprite.new(main_image)
-
-    local hand_direction = direction
-    if hand_direction == up then
-      hand_direction = down
-    end
-    local hands_image = assets['hands-' .. hand_direction]
-    local hands = sprites.Sprite.new(hands_image)
-
-    local hands_behind = direction == up
-    if hands_behind then
-      hands:draw(x, y - 1)
-    end
-    player:draw(x, y)
-    if not hands_behind then
-      hands:draw(x, y)
-    end
-  end
-}
 
 local function is_equal(key)
   return function(state, k)
@@ -278,6 +220,8 @@ function love.load()
             {content = assets.maps.test2.image, center = {200, 100}, radius = 120},
             {content = assets.maps.test2.image, center = {40, 60}, radius = 20}
   )
+
+  state.camera = {x=0, y=0}
 end
 
 function love.update(dt)
@@ -294,6 +238,13 @@ function love.update(dt)
     state.player.direction,
     state.player,
   }
+
+  local follow_weight = 3.0 * dt
+  state.camera.x = state.camera.x *
+    (1.0 - follow_weight) + player.x * follow_weight
+
+  state.camera.y = state.camera.y *
+    (1.0 - follow_weight) + player.y * follow_weight
 end
 
 function love.keypressed(key, scancode, is_repeat)
@@ -322,9 +273,13 @@ function love.draw()
   love.graphics.push()
   love.graphics.translate(screen_width / 2, screen_height / 2)
   love.graphics.scale(3)
+
+  -- Update Camera
+
+
   love.graphics.translate(
-    math.floor(-state.player.x - state.player.width / 2 + 0.5),
-    math.floor(-state.player.y - state.player.height / 2 + 0.5))
+    -state.camera.x - state.player.width / 2,
+    -state.camera.y - state.player.height / 2)
 
   love.graphics.setColor(255, 255, 255)
   love.graphics.setShader()
