@@ -362,16 +362,28 @@ function debug_physics(world)
   for _, body in pairs(state.world:getBodyList()) do
     for _, fixture in pairs(body:getFixtureList()) do
       local shape = fixture:getShape()
+      if fixture:getGroupIndex() ~= state.player.plane.group then
+        love.graphics.setColor(64, 64, 64)
+        if shape:getType() == "circle" then
+          local pos_x, pos_y = body:getWorldPoint(shape:getPoint())
+          love.graphics.circle('line', pos_x, pos_y, shape:getRadius())
+        else
+          love.graphics.polygon('line', body:getWorldPoints(shape:getPoints()))
+        end
+      end
+    end
+  end
+  for _, body in pairs(state.world:getBodyList()) do
+    for _, fixture in pairs(body:getFixtureList()) do
+      local shape = fixture:getShape()
       if fixture:getGroupIndex() == state.player.plane.group then
         love.graphics.setColor(255, 255, 255)
-      else
-        love.graphics.setColor(64, 64, 64)
-      end
-      if shape:getType() == "circle" then
-        local pos_x, pos_y = body:getWorldPoint(shape:getPoint())
-        love.graphics.circle('line', pos_x, pos_y, shape:getRadius())
-      else
-        love.graphics.polygon('line', body:getWorldPoints(shape:getPoints()))
+        if shape:getType() == "circle" then
+          local pos_x, pos_y = body:getWorldPoint(shape:getPoint())
+          love.graphics.circle('line', pos_x, pos_y, shape:getRadius())
+        else
+          love.graphics.polygon('line', body:getWorldPoints(shape:getPoints()))
+        end
       end
     end
   end
