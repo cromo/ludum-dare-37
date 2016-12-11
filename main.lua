@@ -99,8 +99,9 @@ state.machines = {
         {released_raw, is_key(down), emit(state.emitters.key_released, down), playing},
         {released_raw, is_key(left), emit(state.emitters.key_released, left), playing},
         {released_raw, is_key(right), emit(state.emitters.key_released, right), playing},
-        {pressed_raw, is_key 'q', function() pinch_layer(state.planes.volcano, state.player.x, state.player.y, 50) end},
-        {pressed_raw, is_key 'w', function() pinch_layer(state.planes.mansion, state.player.x, state.player.y, 50) end},
+        {pressed_raw, is_key 'q', function() pinch_layer(state.planes.lab, state.player.x, state.player.y, 50) end},
+        {pressed_raw, is_key 'w', function() pinch_layer(state.planes.volcano, state.player.x, state.player.y, 50) end},
+        {pressed_raw, is_key 'e', function() pinch_layer(state.planes.mansion, state.player.x, state.player.y, 50) end},
         {pressed_raw, is_key 'k', function() release_pinch(#lume.reject(state.layers, f'x -> x.removing')) end},
         {pressed_raw, is_key '1', function() state.player:switch_to_plane(state.planes.volcano) end},
         {pressed_raw, is_key '2', function() state.player:switch_to_plane(state.planes.mansion) end},
@@ -176,11 +177,11 @@ state.layers = {
   end
 }
 
-function pinch_layer(target, x, y, radius)
+function pinch_layer(target, x, y, radius, instant)
   local layer = {
     plane = target,
     center = {x, y},
-    radius = 1,
+    radius = radius,
     removing = false,
     type = "layer",
     index = function(self)
@@ -193,7 +194,10 @@ function pinch_layer(target, x, y, radius)
       return nil
     end
   }
-  flux.to(layer, 0.5, {radius = radius})
+  if not instant then
+    layer.radius = 1
+    flux.to(layer, 0.5, {radius = radius})
+  end
   lume.push(state.layers, layer)
 
   layer.body = love.physics.newBody(state.world, x, y, "static")
@@ -264,15 +268,20 @@ function love.load()
     color = {0,0,0},
     group = 1
   }
+  state.planes.lab = {
+    map_name = "lab",
+    color = {192,192,232},
+    group = 2
+  }
   state.planes.volcano = {
     map_name = "test1",
     color = {255,0,0},
-    group = 2
+    group = 3
   }
   state.planes.mansion = {
     map_name = "test2",
     color = {128,128,128},
-    group = 3
+    group = 4
   }
 
   state.world = love.physics.newWorld(0, 0, false)
@@ -307,7 +316,8 @@ function love.load()
   state.machines.game:initialize_state(game)
   state.game = game
 
-  pinch_layer(state.planes.reality, 0, 0, 32 * 16 * 2) -- twice the width
+  pinch_layer(state.planes.reality, 0, 0, 32 * 16 * 2, true) -- twice the width
+  pinch_layer(state.planes.lab, 16 * 32 / 2, 16 * 32 / 2, 32 * 16 * 2, true) -- centered for final effect
 
   state.camera = {x=0, y=0}
 end
