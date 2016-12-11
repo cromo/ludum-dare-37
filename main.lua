@@ -211,10 +211,15 @@ state.layers = {
     love.graphics.draw(self[1])
     for i, layer in ipairs(self) do
       if i ~= 1 then
+        local center = {
+          layer.center[1] / layer.content:getWidth(),
+          layer.center[2] / layer.content:getHeight(),
+        }
+        local radius = layer.radius / layer.content:getWidth()
         local pinch = assets.pinch
         love.graphics.setShader(pinch)
-        pinch:send('center', layer.center)
-        pinch:send('radius', layer.radius)
+        pinch:send('center', center)
+        pinch:send('radius', radius)
         pinch:send('t', state.time)
         love.graphics.draw(layer.content)
       end
@@ -247,9 +252,8 @@ function love.load()
 
   state.layers[1] = assets.maps.test1.image
   lume.push(state.layers,
-            {content = assets.maps.test2.image, center = {0.5, 0.5}, radius = 0.3},
-            {content = state.green, center = {0.75, 0.75}, radius = 0.1},
-            {content = state.blue, center = {0.85, 0.85}, radius = 0.1}
+            {content = assets.maps.test2.image, center = {200, 100}, radius = 120},
+            {content = assets.maps.test2.image, center = {40, 60}, radius = 20}
   )
 end
 
