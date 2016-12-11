@@ -27,11 +27,33 @@ local player = {
     horizontal = {},
     vertical = {}
   },
+  carry = {
+    onBeginContactWith = function(self, object)
+      if not object.type then return end
+      lume.trace('object.type', object.type)
+      if object.type == 'pickup' then
+        self.pickup = object
+      end
+    end,
+    onEndContactWith = function(self, object)
+      if not object.type then return end
+      if object.type == 'pickup' then
+        self.pickup = nil
+      end
+    end,
+    grab = function(self)
+      lume.trace 'grabbing pills'
+    end,
+    drop = function(self)
+      lume.trace 'dropping beats'
+    end,
+  },
   init = function(self)
     -- Setup initial states
     state.machines.player_horizontal:initialize_state(self.movement.horizontal)
     state.machines.player_vertical:initialize_state(self.movement.vertical)
     state.machines.player_direction:initialize_state(self.direction)
+    state.machines.player_carry:initialize_state(self.carry)
     state.machines.player:initialize_state(self)
 
     -- Setup a physics body for our lovely ghost
@@ -46,7 +68,7 @@ local player = {
     local reachable_range = love.physics.newCircleShape(8, 8, 6)
     self.reach = love.physics.newFixture(self.body, reachable_range, 1)
     self.reach:setSensor(true)
-    self.reach:setUserData(self)
+    self.reach:setUserData(self.carry)
   end,
   bubble_to_highest_layer = function(self)
     local highest = -1
@@ -142,13 +164,17 @@ local player = {
     local hands_image = assets['hands-' .. hand_direction]
     local hands = sprites.Sprite.new(hands_image)
 
+    local holding_offset = 0
+    if self.carry.state.name == 'holding' then
+      holding_offset = -10
+    end
     local hands_behind = direction == up
     if hands_behind then
-      hands:draw(x, y - 1)
+      hands:draw(x, y - 1 + holding_offset)
     end
     player:draw(x, y)
     if not hands_behind then
-      hands:draw(x, y)
+      hands:draw(x, y + holding_offset)
     end
   end
 }

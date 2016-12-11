@@ -100,6 +100,7 @@ state.machines = {
         {released_raw, is_key(down), emit(state.emitters.key_released, down), playing},
         {released_raw, is_key(left), emit(state.emitters.key_released, left), playing},
         {released_raw, is_key(right), emit(state.emitters.key_released, right), playing},
+        {pressed_raw, is_key 'space', emit(state.emitters.key_pressed, 'carry'), playing},
         {pressed_raw, is_key 'q', function() pinch_layer(state.planes.lab, state.player.x, state.player.y, 50) end},
         {pressed_raw, is_key 'w', function() pinch_layer(state.planes.volcano, state.player.x, state.player.y, 50) end},
         {pressed_raw, is_key 'e', function() pinch_layer(state.planes.mansion, state.player.x, state.player.y, 50) end},
@@ -145,6 +146,21 @@ state.machines = {
         {direction, is_equal(right), nil, right},
       }
     },
+  },
+  player_carry = live.StateMachine.new_from_table{
+    {nil, 'empty_handed'},
+    {
+      'empty_handed',
+      {
+        {pressed, {is_key 'carry', f'self -> self.pickup'}, f'self -> self:grab()', 'holding'},
+      }
+    },
+    {
+      'holding',
+      {
+        {pressed, is_key 'carry', f'self -> self:drop()', 'empty_handed'}
+      }
+    }
   },
   player = live.StateMachine.new_from_table{
     {nil, playing},
@@ -305,6 +321,19 @@ function love.load()
   pinch_layer(state.planes.gold, 15.5 * tile_size, 24.5 * tile_size, 4 * tile_size)
 
   state.camera = {x=player.x, y=player.y}
+
+  local key = {
+    x = player.x - 30,
+    y = player.y,
+    type = 'pickup',
+  }
+  key.body = love.physics.newBody(state.world, key.x, key.y, "kinematic")
+  key.body:setFixedRotation(true)
+  local key_shape = love.physics.newCircleShape(8, 12, 6)
+  key.fixture = love.physics.newFixture(key.body, key_shape, 1)
+  key.fixture:setUserData(key)
+  state.key = key
+
 end
 
 function love.update(dt)
@@ -319,6 +348,7 @@ function love.update(dt)
     state.player.movement.horizontal,
     state.player.movement.vertical,
     state.player.direction,
+    state.player.carry,
     state.player,
   }
 
