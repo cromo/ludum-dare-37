@@ -197,6 +197,8 @@ function love.load()
             {content = assets.maps.test2.image, center = {200, 100}, radius = 120},
             {content = assets.maps.test2.image, center = {40, 60}, radius = 20}
   )
+
+  state.camera = {x=0, y=0}
 end
 
 function love.update(dt)
@@ -212,6 +214,13 @@ function love.update(dt)
     state.player.direction,
     state.player,
   }
+
+  local follow_weight = 3.0 * dt
+  state.camera.x = state.camera.x *
+    (1.0 - follow_weight) + player.x * follow_weight
+
+  state.camera.y = state.camera.y *
+    (1.0 - follow_weight) + player.y * follow_weight
 end
 
 function love.keypressed(key, scancode, is_repeat)
@@ -240,9 +249,13 @@ function love.draw()
   love.graphics.push()
   love.graphics.translate(screen_width / 2, screen_height / 2)
   love.graphics.scale(3)
+
+  -- Update Camera
+
+
   love.graphics.translate(
-    math.floor(-state.player.x - state.player.width / 2 + 0.5),
-    math.floor(-state.player.y - state.player.height / 2 + 0.5))
+    -state.camera.x - state.player.width / 2,
+    -state.camera.y - state.player.height / 2)
 
   love.graphics.setColor(255, 255, 255)
   love.graphics.setShader()

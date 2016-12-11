@@ -50,8 +50,6 @@ local player = {
   end,
   draw = function(self)
     local x, y = self.x, self.y
-    x = math.floor(x + 0.5)
-    y = math.floor(y + 0.5)
     local direction = self.direction.state.name
     local main_image = assets['ghost-' .. direction]
     local player = sprites.Sprite.new(main_image)
