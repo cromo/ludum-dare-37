@@ -1,7 +1,8 @@
-local sprites = require 'sprites'
 local assets = require 'assets'
 local live = require 'live'
 local lume = require 'lume'
+local sprites = require 'sprites'
+local sti = require 'sti'
 
 local player = require("player")
 
@@ -175,7 +176,12 @@ function love.load()
 
   assets.register('png', sprites.Sheet.load)
   assets.register('frag', love.graphics.newShader)
+  assets.register('lua', function(path) return sti.new(path, {'box2d'}) end)
   assets.load('assets')
+
+  state.world = love.physics.newWorld(0, 0, false)
+  state.map = assets["test1"]
+  state.map:box2d_init(state.world)
 
   state.machines.player_horizontal:initialize_state(player.movement.horizontal)
   state.machines.player_vertical:initialize_state(player.movement.vertical)
@@ -234,6 +240,14 @@ function love.keyreleased(key)
   state.emitters.raw_key_released:emit(key)
 end
 
+function debug_physics(world)
+  for _, body in pairs(world:getBodyList()) do
+    for _, fixture in pairs(body:getFixtureList()) do
+      love.graphics.polygon('line', body:getWorldPoints(fixture:getShape():getPoints()))
+    end
+  end
+end
+
 function love.draw()
   local screen_width, screen_height = love.graphics.getDimensions()
   local mid_x, mid_y = screen_width / 2, screen_height / 2
@@ -250,9 +264,6 @@ function love.draw()
   love.graphics.translate(screen_width / 2, screen_height / 2)
   love.graphics.scale(3)
 
-  -- Update Camera
-
-
   love.graphics.translate(
     -state.camera.x - state.player.width / 2,
     -state.camera.y - state.player.height / 2)
@@ -268,6 +279,8 @@ function love.draw()
   love.graphics.setColor(255, 255, 255)
   love.graphics.setShader()
   state.player:draw()
+
+  debug_physics(state.world)
 
   love.graphics.pop()
 
