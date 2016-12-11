@@ -42,6 +42,11 @@ local player = {
     self.fixture:setGroupIndex(self.plane.group)
     self.fixture:setMask(2)
     self.fixture:setUserData(self)
+
+    local reachable_range = love.physics.newCircleShape(8, 8, 6)
+    self.reach = love.physics.newFixture(self.body, reachable_range, 1)
+    self.reach:setSensor(true)
+    self.reach:setUserData(self)
   end,
   bubble_to_highest_layer = function(self)
     local highest = -1
@@ -108,6 +113,21 @@ local player = {
 
     self.x = self.body:getX()
     self.y = self.body:getY()
+
+    -- Reposition the reach bubble
+    local direction = self.direction.state.name
+    local reach_delta = 4
+    local reach_offset = {
+      left = {-reach_delta, 0},
+      right = {reach_delta, 0},
+      up = {0, -reach_delta},
+      down = {0, reach_delta},
+    }
+
+    local reach_base = {self.fixture:getShape():getPoint()}
+    self.reach:getShape():setPoint(
+      reach_base[1] + reach_offset[direction][1],
+      reach_base[2] + reach_offset[direction][2])
   end,
   draw = function(self)
     local x, y = self.x, self.y
