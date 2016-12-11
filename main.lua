@@ -99,7 +99,8 @@ state.machines = {
         {released_raw, is_key(down), emit(state.emitters.key_released, down), playing},
         {released_raw, is_key(left), emit(state.emitters.key_released, left), playing},
         {released_raw, is_key(right), emit(state.emitters.key_released, right), playing},
-        {pressed_raw, is_key 'space', function() pinch_layer(state.planes.mansion, state.player.x, state.player.y, 60) end},
+        {pressed_raw, is_key 'q', function() pinch_layer(state.planes.volcano, state.player.x, state.player.y, 50) end},
+        {pressed_raw, is_key 'w', function() pinch_layer(state.planes.mansion, state.player.x, state.player.y, 50) end},
         {pressed_raw, is_key 'k', function() release_pinch(#state.layers) end},
         {pressed_raw, is_key '1', function() state.player:switch_to_plane(state.planes.volcano) end},
         {pressed_raw, is_key '2', function() state.player:switch_to_plane(state.planes.mansion) end},
@@ -156,9 +157,9 @@ state.machines = {
 state.layers = {
   draw = function(self)
     love.graphics.setColor(255, 255, 255)
-    love.graphics.draw(self[1].prerender)
+    --love.graphics.draw(self[1].prerender)
     for i, layer in ipairs(self) do
-      if i ~= 1 then
+      --if i ~= 1 then
         local center = {
           layer.center[1] / layer.plane.prerender:getWidth(),
           layer.center[2] / layer.plane.prerender:getHeight(),
@@ -170,7 +171,7 @@ state.layers = {
         pinch:send('radius', radius)
         pinch:send('t', state.time)
         love.graphics.draw(layer.plane.prerender)
-      end
+      --end
     end
   end
 }
@@ -187,10 +188,12 @@ function pinch_layer(target, x, y, radius)
           return i
         end
       end
+      print("Couldn't find ourself in the list! Oh noes...")
       return nil
     end
   }
   flux.to(layer, 0.5, {radius = radius})
+  lume.push(state.layers, layer)
 
   layer.body = love.physics.newBody(state.world, x, y, "static")
   layer.body:setFixedRotation(true)
@@ -198,8 +201,6 @@ function pinch_layer(target, x, y, radius)
   layer.fixture = love.physics.newFixture(layer.body, collision_circle, 1)
   layer.fixture:setSensor(true)
   layer.fixture:setUserData(layer)
-
-  lume.push(state.layers, layer)
 
   return #state.layers
 end
@@ -252,15 +253,20 @@ function love.load()
   assets.load('assets')
 
   state.planes = {}
+  state.planes.reality = {
+    map_name = "reality",
+    color = {0,0,0},
+    group = 1
+  }
   state.planes.volcano = {
     map_name = "test1",
     color = {255,0,0},
-    group = 1
+    group = 2
   }
   state.planes.mansion = {
     map_name = "test2",
     color = {128,128,128},
-    group = 2
+    group = 3
   }
 
   state.world = love.physics.newWorld(0, 0, false)
@@ -286,7 +292,7 @@ function love.load()
 
   state.world:setCallbacks(world_begin_contact, world_end_contact, nil, nil)
 
-  player.plane = state.planes.volcano
+  player.plane = state.planes.reality
 
   player:init()
   state.player = player
@@ -295,7 +301,7 @@ function love.load()
   state.machines.game:initialize_state(game)
   state.game = game
 
-  state.layers[1] = player.plane
+  pinch_layer(state.planes.reality, 0, 0, 32 * 16 * 2) -- twice the width
 
   state.camera = {x=0, y=0}
 end
