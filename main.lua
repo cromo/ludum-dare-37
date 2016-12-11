@@ -99,7 +99,7 @@ state.machines = {
         {released_raw, is_key(down), emit(state.emitters.key_released, down), playing},
         {released_raw, is_key(left), emit(state.emitters.key_released, left), playing},
         {released_raw, is_key(right), emit(state.emitters.key_released, right), playing},
-        {pressed_raw, is_key 'space', function() pinch_layer('test2', state.player.x, state.player.y, 60) end},
+        {pressed_raw, is_key 'space', function() pinch_layer('mansion', state.player.x, state.player.y, 60) end},
         {pressed_raw, is_key 'k', function() release_pinch(#state.layers) end},
       }
     },
@@ -175,7 +175,7 @@ state.layers = {
 
 function pinch_layer(target, x, y, radius)
   local layer = {
-    content = assets.maps[target].image,
+    content = state.planes[target].prerender,
     center = {x, y},
     radius = 1
   }
@@ -185,6 +185,7 @@ function pinch_layer(target, x, y, radius)
 end
 
 function release_pinch(number)
+  number = number or #state.layers
   if number == 1 then
     return
   end
@@ -214,9 +215,12 @@ function love.load()
   }
 
   for name, plane in pairs(state.planes) do
+    local map = assets[plane.map_name]
     plane.world = love.physics.newWorld(0, 0, false)
-    plane.map = assets[plane.map_name]
+    plane.map = map
     plane.map:box2d_init(plane.world)
+    plane.prerender = love.graphics.newCanvas(map.width * map.tilewidth, map.height * map.tileheight)
+    plane.prerender:renderTo(function() plane.map:draw() end)
   end
 
   player.plane = state.planes.volcano
@@ -307,9 +311,6 @@ function love.draw()
 
   love.graphics.setColor(255, 255, 255)
   love.graphics.setShader()
-
-  love.graphics.print("Hello, LD37")
-
   state.layers:draw()
 
   love.graphics.setColor(255, 255, 255)
