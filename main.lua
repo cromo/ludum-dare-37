@@ -179,10 +179,21 @@ function pinch_layer(target, x, y, radius)
   local layer = {
     content = state.planes[target].prerender,
     center = {x, y},
-    radius = 1
+    radius = 1,
+    type = "layer"
   }
   flux.to(layer, 0.5, {radius = radius})
+
+  layer.body = love.physics.newBody(state.world, x, y, "static")
+  layer.body:setFixedRotation(true)
+  local collision_circle = love.physics.newCircleShape(0, 0, radius)
+  layer.fixture = love.physics.newFixture(layer.body, collision_circle, 1)
+  layer.fixture:setGroupIndex(16)
+  layer.fixture:setSensor(true)
+  layer.fixture:setUserData(layer)
+
   lume.push(state.layers, layer)
+
   return #state.layers
 end
 
@@ -196,6 +207,32 @@ function release_pinch(number)
       table.remove(state.layers, number)
   end)
 
+end
+
+function world_begin_contact(a, b, coll)
+  if a:getUserData() ~= nil and b:getUserData() ~= nil then
+    a_obj = a:getUserData()
+    b_obj = b:getUserData()
+    if a_obj.onBeginContactWith then
+      a_obj:onBeginContactWith(b_obj)
+    end
+    if b_obj.onBeginContactWith then
+      b_obj:onBeginContactWith(a_obj)
+    end
+  end
+end
+
+function world_end_contact(a, b, coll)
+  if a:getUserData() ~= nil and b:getUserData() ~= nil then
+    a_obj = a:getUserData()
+    b_obj = b:getUserData()
+    if a_obj.onEndContactWith then
+      a_obj:onEndContactWith(b_obj)
+    end
+    if b_obj.onEndContactWith then
+      b_obj:onEndContactWith(a_obj)
+    end
+  end
 end
 
 function love.load()
@@ -240,6 +277,8 @@ function love.load()
     end
   end
 
+  state.world:setCallbacks(world_begin_contact, world_end_contact, nil, nil)
+
   player.plane = state.planes.volcano
 
   player:init()
@@ -250,10 +289,6 @@ function love.load()
   state.game = game
 
   state.layers[1] = assets.maps.test1.image
-  lume.push(state.layers,
-            {content = assets.maps.test2.image, center = {200, 100}, radius = 120},
-            {content = assets.maps.test2.image, center = {40, 60}, radius = 20}
-  )
 
   state.camera = {x=0, y=0}
 end

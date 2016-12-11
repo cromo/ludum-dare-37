@@ -18,6 +18,7 @@ local player = {
   width = 16,
   height = 16,
   speed = 60,
+  type = "player",
   direction = {},
   movement = {
     horizontal = {},
@@ -37,6 +38,13 @@ local player = {
     self.fixture = love.physics.newFixture(self.body, origin_point, 1)
     self.fixture:setGroupIndex(self.plane.group)
     self.fixture:setMask(2)
+    self.fixture:setUserData(self)
+  end,
+  onBeginContactWith = function(self, object)
+    if object.type == "layer" then
+      -- nope, not actually
+      print("NOT IMPLEMENTED")
+    end
   end,
   switch_to_plane = function(self, plane)
     self.fixture:setGroupIndex(plane.group)
