@@ -211,10 +211,6 @@ function love.load()
   state.machines.game:initialize_state(game)
   state.game = game
 
-  state.red = love.graphics.newCanvas(100, 100)
-  state.blue = love.graphics.newCanvas(100, 100)
-  state.green = love.graphics.newCanvas(100, 100)
-
   state.layers[1] = assets.maps.test1.image
   lume.push(state.layers,
             {content = assets.maps.test2.image, center = {200, 100}, radius = 120},
@@ -262,14 +258,6 @@ function love.draw()
   local screen_width, screen_height = love.graphics.getDimensions()
   local mid_x, mid_y = screen_width / 2, screen_height / 2
 
-  -- TODO: remove these when we get actual layers to play with
-  love.graphics.setColor(255, 0, 0)
-  state.red:renderTo(function() love.graphics.rectangle('fill', 0, 0, 100, 100) end)
-  love.graphics.setColor(0, 0, 255)
-  state.blue:renderTo(function() love.graphics.rectangle('fill', 0, 0, 100, 100) end)
-  love.graphics.setColor(0, 128, 0)
-  state.green:renderTo(function() love.graphics.rectangle('fill', 0, 0, 100, 100) end)
-
   love.graphics.push()
   love.graphics.translate(screen_width / 2, screen_height / 2)
   love.graphics.scale(3)
@@ -293,7 +281,4 @@ function love.draw()
   state.player:draw()
 
   love.graphics.pop()
-
-  -- love.graphics.line(mid_x, 0, mid_x, screen_height)
-  -- love.graphics.line(0, mid_y, screen_width, mid_y)
 end
