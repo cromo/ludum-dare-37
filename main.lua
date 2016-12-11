@@ -2,6 +2,7 @@ local sprites = require 'sprites'
 local assets = require 'assets'
 local live = require 'live'
 local lume = require 'lume'
+local flux = require 'flux'
 
 local f = lume.lambda
 local trace = lume.trace
@@ -155,6 +156,8 @@ state.machines = {
         {released_raw, is_key(down), emit(state.emitters.key_released, down), playing},
         {released_raw, is_key(left), emit(state.emitters.key_released, left), playing},
         {released_raw, is_key(right), emit(state.emitters.key_released, right), playing},
+        {pressed_raw, is_key 'space', function() pinch_layer('test2', state.player.x, state.player.y, 60) end},
+        {pressed_raw, is_key 'k', function() release_pinch(#state.layers) end},
       }
     },
   },
@@ -227,7 +230,28 @@ state.layers = {
   end
 }
 
-local tiles
+function pinch_layer(target, x, y, radius)
+  local layer = {
+    content = assets.maps[target].image,
+    center = {x, y},
+    radius = 1
+  }
+  flux.to(layer, 0.5, {radius = radius})
+  lume.push(state.layers, layer)
+  return #state.layers
+end
+
+function release_pinch(number)
+  if number == 1 then
+    return
+  end
+  local layer = state.layers[number]
+  flux.to(layer, 0.3, {radius = 1}):oncomplete(function()
+      table.remove(state.layers, number)
+  end)
+  
+end
+
 function love.load()
   love.graphics.setDefaultFilter('nearest', 'nearest')
 
@@ -245,7 +269,6 @@ function love.load()
   state.machines.game:initialize_state(game)
   state.game = game
 
-  tiles = sprites.Sprite.new(assets.starting_tiles)
   state.red = love.graphics.newCanvas(100, 100)
   state.blue = love.graphics.newCanvas(100, 100)
   state.green = love.graphics.newCanvas(100, 100)
@@ -259,6 +282,7 @@ end
 
 function love.update(dt)
   require("lovebird").update()
+  flux.update(dt)
 
   state.time = state.time + dt
 
@@ -306,7 +330,6 @@ function love.draw()
   love.graphics.setShader()
 
   love.graphics.print("Hello, LD37")
-  tiles:draw()
 
   state.layers:draw()
 
