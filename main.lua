@@ -224,15 +224,17 @@ function pinch_layer(target, x, y, radius, instant)
   layer.fixture:setSensor(true)
   layer.fixture:setUserData(layer)
 
-  return #state.layers
+  return layer
 end
 
-function release_pinch(number)
-  number = number or #state.layers
-  if number == 1 then
+function release_pinch(layer)
+  layer = layer or #state.layers
+  if type(layer) == 'number' then
+    layer = state.layers[number]
+  end
+  if layer == state.layers[1] then
     return
   end
-  local layer = state.layers[number]
   layer.removing = true
   flux.to(layer, 0.3, {radius = 1}):oncomplete(function()
       if not layer.fixture:isDestroyed() then
@@ -326,6 +328,7 @@ function love.load()
     x = player.x - 30,
     y = player.y,
     type = 'planar_key',
+    plane = planes.lab,
   }
   key.body = love.physics.newBody(state.world, key.x, key.y, "kinematic")
   key.body:setFixedRotation(true)
@@ -337,15 +340,21 @@ function love.load()
   local anchor = {
     x = player.x + 30,
     y = player.y,
+    radius = 140,
     type = 'receptacle',
     holding = nil,
     hold = function(self, object)
-      -- TODO: pinch here if needed
       self.holding = object
       object.body:setPosition(self.body:getPosition())
+      if object.type == 'planar_key' then
+        local width = 16
+        self.pinch = pinch_layer(object.plane, self.x + width / 2, self.y, self.radius)
+      end
     end,
     unparent = function(self)
       -- TODO: unpinch here if needed
+      release_pinch(self.pinch)
+      self.pinch = nil
       self.holding = nil
     end,
   }
