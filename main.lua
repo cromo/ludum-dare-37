@@ -101,6 +101,8 @@ state.machines = {
         {released_raw, is_key(right), emit(state.emitters.key_released, right), playing},
         {pressed_raw, is_key 'space', function() pinch_layer('mansion', state.player.x, state.player.y, 60) end},
         {pressed_raw, is_key 'k', function() release_pinch(#state.layers) end},
+        {pressed_raw, is_key '1', function() state.player:switch_to_plane(state.planes.volcano) end},
+        {pressed_raw, is_key '2', function() state.player:switch_to_plane(state.planes.mansion) end},
       }
     },
   },
@@ -207,13 +209,16 @@ function love.load()
   state.planes = {}
   state.planes.volcano = {
     map_name = "test1",
-    color = {255,0,0}
+    color = {255,0,0},
+    group = 1
   }
   state.planes.mansion = {
     map_name = "test2",
-    color = {128,128,128}
+    color = {128,128,128},
+    group = 2
   }
 
+  state.world = love.physics.newWorld(0, 0, false)
   for name, plane in pairs(state.planes) do
     local map = assets[plane.map_name]
     plane.world = love.physics.newWorld(0, 0, false)
@@ -221,6 +226,18 @@ function love.load()
     plane.map:box2d_init(plane.world)
     plane.prerender = love.graphics.newCanvas(map.width * map.tilewidth, map.height * map.tileheight)
     plane.prerender:renderTo(function() plane.map:draw() end)
+
+    -- Go through the world and assign the appropriate
+    -- group number to all the new objects that were just
+    -- added for this plane
+    for _, body in pairs(state.world:getBodyList()) do
+      for _, fixture in pairs(body:getFixtureList()) do
+        if fixture:getGroupIndex() == 0 then
+          fixture:setGroupIndex(plane.group)
+          fixture:setCategory(2)
+        end
+      end
+    end
   end
 
   player.plane = state.planes.volcano
@@ -263,9 +280,7 @@ function love.update(dt)
   state.camera.y = state.camera.y *
     (1.0 - follow_weight) + player.y * follow_weight
 
-  for _, plane in pairs(state.planes) do
-    plane.world:update(dt)
-  end
+  state.world:update(dt)
 end
 
 function love.keypressed(key, scancode, is_repeat)
@@ -280,17 +295,19 @@ function love.keyreleased(key)
 end
 
 function debug_physics(world)
-  for _, plane in pairs(state.planes) do
-    for _, body in pairs(plane.world:getBodyList()) do
-      for _, fixture in pairs(body:getFixtureList()) do
-        local shape = fixture:getShape()
-        love.graphics.setColor(plane.color)
-        if shape:getType() == "circle" then
-          local pos_x, pos_y = body:getWorldPoint(shape:getPoint())
-          love.graphics.circle('line', pos_x, pos_y, shape:getRadius())
-        else
-          love.graphics.polygon('line', body:getWorldPoints(shape:getPoints()))
-        end
+  for _, body in pairs(state.world:getBodyList()) do
+    for _, fixture in pairs(body:getFixtureList()) do
+      local shape = fixture:getShape()
+      if fixture:getGroupIndex() == state.player.plane.group then
+        love.graphics.setColor(255, 255, 255)
+      else
+        love.graphics.setColor(64, 64, 64)
+      end
+      if shape:getType() == "circle" then
+        local pos_x, pos_y = body:getWorldPoint(shape:getPoint())
+        love.graphics.circle('line', pos_x, pos_y, shape:getRadius())
+      else
+        love.graphics.polygon('line', body:getWorldPoints(shape:getPoints()))
       end
     end
   end
