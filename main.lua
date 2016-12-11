@@ -160,16 +160,16 @@ state.layers = {
     for i, layer in ipairs(self) do
       if i ~= 1 then
         local center = {
-          layer.center[1] / layer.content:getWidth(),
-          layer.center[2] / layer.content:getHeight(),
+          layer.center[1] / layer.plane.prerender:getWidth(),
+          layer.center[2] / layer.plane.prerender:getHeight(),
         }
-        local radius = layer.radius / layer.content:getWidth()
+        local radius = layer.radius / layer.plane.prerender:getWidth()
         local pinch = assets.pinch
         love.graphics.setShader(pinch)
         pinch:send('center', center)
         pinch:send('radius', radius)
         pinch:send('t', state.time)
-        love.graphics.draw(layer.content)
+        love.graphics.draw(layer.plane.prerender)
       end
     end
   end
@@ -178,7 +178,6 @@ state.layers = {
 function pinch_layer(target, x, y, radius)
   local layer = {
     plane = target,
-    content = target.prerender,
     center = {x, y},
     radius = 1,
     type = "layer"
