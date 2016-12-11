@@ -325,7 +325,7 @@ function love.load()
   local key = {
     x = player.x - 30,
     y = player.y,
-    type = 'pickup',
+    type = 'planar_key',
   }
   key.body = love.physics.newBody(state.world, key.x, key.y, "kinematic")
   key.body:setFixedRotation(true)
@@ -334,6 +334,27 @@ function love.load()
   key.fixture:setUserData(key)
   state.key = key
 
+  local anchor = {
+    x = player.x + 30,
+    y = player.y,
+    type = 'receptacle',
+    holding = nil,
+    hold = function(self, object)
+      -- TODO: pinch here if needed
+      self.holding = object
+      object.body:setPosition(self.body:getPosition())
+    end,
+    unparent = function(self)
+      -- TODO: unpinch here if needed
+      self.holding = nil
+    end,
+  }
+  anchor.body = love.physics.newBody(state.world, anchor.x, anchor.y, 'kinematic')
+  anchor.body:setFixedRotation(true)
+  local anchor_shape = love.physics.newCircleShape(8, 12, 6)
+  anchor.fixture = love.physics.newFixture(anchor.body, anchor_shape, 1)
+  anchor.fixture:setUserData(anchor)
+  state.anchor = anchor
 end
 
 function love.update(dt)

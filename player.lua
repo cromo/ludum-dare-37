@@ -14,6 +14,10 @@ local update = 'dt'
 
 local tile_size = 16
 
+local carryables = {
+  planar_key = true
+}
+
 local player = {
   x = 15 * tile_size,
   y = 29 * tile_size,
@@ -30,22 +34,31 @@ local player = {
   carry = {
     onBeginContactWith = function(self, object)
       if not object.type then return end
-      lume.trace('object.type', object.type)
-      if object.type == 'pickup' then
+      if carryables[object.type] then
         self.pickup = object
+      end
+      if object.type == 'receptacle' then
+        self.drop_target = object
       end
     end,
     onEndContactWith = function(self, object)
       if not object.type then return end
-      if object.type == 'pickup' then
+      if carryables[object.type] then
         self.pickup = nil
+      end
+      if object.type == 'receptacle' then
+        self.drop_target = nil
       end
     end,
     grab = function(self)
-      lume.trace 'grabbing pills'
+      if self.drop_target and self.drop_target.holding == self.pickup then
+        self.drop_target:unparent()
+      end
+      self.holding = self.pickup
     end,
     drop = function(self)
-      lume.trace 'dropping beats'
+      self.dropping = self.holding
+      self.holding = nil
     end,
   },
   init = function(self)
@@ -140,16 +153,34 @@ local player = {
     local direction = self.direction.state.name
     local reach_delta = 4
     local reach_offset = {
-      left = {-reach_delta, 0},
-      right = {reach_delta, 0},
-      up = {0, -reach_delta},
-      down = {0, reach_delta},
+      left = {-1, 0},
+      right = {1, 0},
+      up = {0, -1},
+      down = {0, 1},
     }
 
     local reach_base = {self.fixture:getShape():getPoint()}
     self.reach:getShape():setPoint(
-      reach_base[1] + reach_offset[direction][1],
-      reach_base[2] + reach_offset[direction][2])
+      reach_base[1] + reach_delta * reach_offset[direction][1],
+      reach_base[2] + reach_delta * reach_offset[direction][2])
+
+    -- Reposition carried object
+    if self.carry.holding then
+      local held = self.carry.holding
+      held.body:setPosition(self.x, self.y - 16)
+    end
+    if self.carry.dropping then
+      local held = self.carry.dropping
+      self.carry.dropping = nil
+      if self.carry.drop_target and not self.carry.drop_target.holding then
+        self.carry.drop_target:hold(held)
+      else
+        local put_offset = 12.5
+        held.body:setPosition(
+          self.x + put_offset * reach_offset[direction][1],
+          self.y + put_offset * reach_offset[direction][2])
+      end
+    end
   end,
   draw = function(self)
     local x, y = self.x, self.y
@@ -168,6 +199,7 @@ local player = {
     if self.carry.state.name == 'holding' then
       holding_offset = -10
     end
+
     local hands_behind = direction == up
     if hands_behind then
       hands:draw(x, y - 1 + holding_offset)
