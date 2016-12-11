@@ -17,6 +17,7 @@ local player = {
   y = 0,
   width = 16,
   height = 16,
+  speed = 60,
   direction = {},
   movement = {
     horizontal = {},
@@ -40,11 +41,12 @@ local player = {
     local distance = lume.distance(0, 0, position_delta.x, position_delta.y)
     if 0 < distance then
       position_delta = lume.map(position_delta, function(i) return i / distance end)
-    end
 
-    local speed = 40
-    self.x = self.x + position_delta.x * speed * dt
-    self.y = self.y + position_delta.y * speed * dt
+      self.x = self.x + position_delta.x * self.speed * dt
+      self.y = self.y + position_delta.y * self.speed * dt
+    else
+      self.current_speed = 0
+    end
   end,
   draw = function(self)
     local x, y = self.x, self.y
