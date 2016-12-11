@@ -258,9 +258,8 @@ function love.load()
   state.world = love.physics.newWorld(0, 0, false)
   for name, plane in pairs(state.planes) do
     local map = assets[plane.map_name]
-    plane.world = love.physics.newWorld(0, 0, false)
     plane.map = map
-    plane.map:box2d_init(plane.world)
+    plane.map:box2d_init(state.world)
     plane.prerender = love.graphics.newCanvas(map.width * map.tilewidth, map.height * map.tileheight)
     plane.prerender:renderTo(function() plane.map:draw() end)
 
