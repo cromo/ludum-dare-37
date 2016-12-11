@@ -207,10 +207,7 @@ function love.load()
   state.map = assets["test1"]
   state.map:box2d_init(state.world)
 
-  state.machines.player_horizontal:initialize_state(player.movement.horizontal)
-  state.machines.player_vertical:initialize_state(player.movement.vertical)
-  state.machines.player_direction:initialize_state(player.direction)
-  state.machines.player:initialize_state(player)
+  player:init()
   state.player = player
 
   local game = {}
@@ -247,6 +244,8 @@ function love.update(dt)
 
   state.camera.y = state.camera.y *
     (1.0 - follow_weight) + player.y * follow_weight
+
+  state.world:update(dt)
 end
 
 function love.keypressed(key, scancode, is_repeat)
@@ -263,7 +262,13 @@ end
 function debug_physics(world)
   for _, body in pairs(world:getBodyList()) do
     for _, fixture in pairs(body:getFixtureList()) do
-      love.graphics.polygon('line', body:getWorldPoints(fixture:getShape():getPoints()))
+      local shape = fixture:getShape()
+      if shape:getType() == "circle" then
+        local pos_x, pos_y = body:getWorldPoint(shape:getPoint())
+        love.graphics.circle('line', pos_x, pos_y, shape:getRadius())
+      else
+        love.graphics.polygon('line', body:getWorldPoints(shape:getPoints()))
+      end
     end
   end
 end

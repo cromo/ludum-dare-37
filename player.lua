@@ -13,8 +13,8 @@ local released = 'key_released'
 local update = 'dt'
 
 local player = {
-  x = 0,
-  y = 0,
+  x = 32,
+  y = 32,
   width = 16,
   height = 16,
   speed = 60,
@@ -23,6 +23,19 @@ local player = {
     horizontal = {},
     vertical = {}
   },
+  init = function(self)
+    -- Setup initial states
+    state.machines.player_horizontal:initialize_state(self.movement.horizontal)
+    state.machines.player_vertical:initialize_state(self.movement.vertical)
+    state.machines.player_direction:initialize_state(self.direction)
+    state.machines.player:initialize_state(self)
+
+    -- Setup a physics body for our lovely ghost
+    self.body = love.physics.newBody(state.world, 32, 32, "dynamic")
+    self.body:setFixedRotation(true)
+    local origin_point = love.physics.newCircleShape(8, 12, 6.0)
+    self.fixture = love.physics.newFixture(self.body, origin_point, 1)
+  end,
   update = function(self, dt)
     local horizontal = self.movement.horizontal.state.name
     local vertical = self.movement.vertical.state.name
@@ -42,11 +55,18 @@ local player = {
     if 0 < distance then
       position_delta = lume.map(position_delta, function(i) return i / distance end)
 
-      self.x = self.x + position_delta.x * self.speed * dt
-      self.y = self.y + position_delta.y * self.speed * dt
+      -- self.x = self.x + position_delta.x * self.speed * dt
+      -- self.y = self.y + position_delta.y * self.speed * dt
+
+      self.body:setLinearVelocity(self.speed * position_delta.x, self.speed * position_delta.y)
     else
       self.current_speed = 0
+
+      self.body:setLinearVelocity(0, 0)
     end
+
+    self.x = self.body:getX()
+    self.y = self.body:getY()
   end,
   draw = function(self)
     local x, y = self.x, self.y
