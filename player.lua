@@ -19,6 +19,7 @@ local player = {
   height = 16,
   speed = 60,
   type = "player",
+  active_layers = {},
   direction = {},
   movement = {
     horizontal = {},
@@ -40,10 +41,34 @@ local player = {
     self.fixture:setMask(2)
     self.fixture:setUserData(self)
   end,
+  bubble_to_highest_layer = function(self)
+    local highest = -1
+    local highest_layer = nil
+    for _, layer in pairs(self.active_layers) do
+      if layer:index() > highest then
+        highest = layer:index()
+        highest_layer = layer
+      end
+    end
+    if highest_layer then
+      self.fixture:setGroupIndex(highest_layer.plane.group)
+      self.plane = highest_layer.plane
+    else
+      print("Couldn't find layer to bubble to! This shouldn't happen.")
+    end
+  end,
   onBeginContactWith = function(self, object)
     if object.type == "layer" then
-      -- nope, not actually
-      print("NOT IMPLEMENTED")
+      local layer = object
+      self.active_layers[layer] = layer
+      self:bubble_to_highest_layer()
+    end
+  end,
+  onEndContactWith = function(self, object)
+    if object.type == "layer" then
+      local layer = object
+      self.active_layers[layer] = nil
+      self:bubble_to_highest_layer()
     end
   end,
   switch_to_plane = function(self, plane)

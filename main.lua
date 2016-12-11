@@ -180,7 +180,15 @@ function pinch_layer(target, x, y, radius)
     plane = target,
     center = {x, y},
     radius = 1,
-    type = "layer"
+    type = "layer",
+    index = function(self)
+      for i = 1, #state.layers do
+        if state.layers[i] == self then
+          return i
+        end
+      end
+      return nil
+    end
   }
   flux.to(layer, 0.5, {radius = radius})
 
@@ -188,7 +196,6 @@ function pinch_layer(target, x, y, radius)
   layer.body:setFixedRotation(true)
   local collision_circle = love.physics.newCircleShape(0, 0, radius)
   layer.fixture = love.physics.newFixture(layer.body, collision_circle, 1)
-  layer.fixture:setGroupIndex(16)
   layer.fixture:setSensor(true)
   layer.fixture:setUserData(layer)
 
