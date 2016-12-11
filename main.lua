@@ -1,6 +1,7 @@
 local assets = require 'assets'
 local live = require 'live'
 local lume = require 'lume'
+local planes = require 'planes'
 local sprites = require 'sprites'
 local sti = require 'sti'
 local flux = require 'flux'
@@ -262,27 +263,7 @@ function love.load()
   assets.register('lua', function(path) return sti.new(path, {'box2d'}) end)
   assets.load('assets')
 
-  state.planes = {}
-  state.planes.reality = {
-    map_name = "reality",
-    color = {0,0,0},
-    group = 1
-  }
-  state.planes.lab = {
-    map_name = "lab",
-    color = {192,192,232},
-    group = 2
-  }
-  state.planes.volcano = {
-    map_name = "test1",
-    color = {255,0,0},
-    group = 3
-  }
-  state.planes.mansion = {
-    map_name = "test2",
-    color = {128,128,128},
-    group = 4
-  }
+  state.planes = planes
 
   state.world = love.physics.newWorld(0, 0, false)
   for name, plane in pairs(state.planes) do
@@ -316,10 +297,14 @@ function love.load()
   state.machines.game:initialize_state(game)
   state.game = game
 
-  pinch_layer(state.planes.reality, 0, 0, 32 * 16 * 2, true) -- twice the width
-  pinch_layer(state.planes.lab, 16 * 32 / 2, 16 * 32 / 2, 32 * 16 * 2, true) -- centered for final effect
+  local map_size = 32
+  local tile_size = 16
+  local instant = true
+  pinch_layer(state.planes.reality, 0, 0, 32 * 16 * 2, instant) -- twice the width
+  pinch_layer(state.planes.lab, 16 * 32 / 2, 16 * 32 / 2, 32 * 16 * 2, instant)
+  pinch_layer(state.planes.gold, 15.5 * tile_size, 24.5 * tile_size, 4 * tile_size)
 
-  state.camera = {x=0, y=0}
+  state.camera = {x=player.x, y=player.y}
 end
 
 function love.update(dt)

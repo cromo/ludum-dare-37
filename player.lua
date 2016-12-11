@@ -12,9 +12,11 @@ local released = 'key_released'
 
 local update = 'dt'
 
+local tile_size = 16
+
 local player = {
-  x = 32,
-  y = 32,
+  x = 15 * tile_size,
+  y = 29 * tile_size,
   width = 16,
   height = 16,
   speed = 60,
@@ -33,7 +35,7 @@ local player = {
     state.machines.player:initialize_state(self)
 
     -- Setup a physics body for our lovely ghost
-    self.body = love.physics.newBody(state.world, 32, 32, "dynamic")
+    self.body = love.physics.newBody(state.world, self.x, self.y, "dynamic")
     self.body:setFixedRotation(true)
     local origin_point = love.physics.newCircleShape(8, 12, 6.0)
     self.fixture = love.physics.newFixture(self.body, origin_point, 1)
