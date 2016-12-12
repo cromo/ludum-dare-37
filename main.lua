@@ -374,11 +374,15 @@ end
 
 local function new_planar_key(x, y, plane)
   local function draw(self, x, y)
+    local original_color = {love.graphics.getColor()}
+    love.graphics.setColor(unpack(self.to_plane.color))
     if self.parented then
       love.graphics.draw(self.plane.key_image, x, y)
+      love.graphics.setColor(unpack(original_color))
       return
     end
     love.graphics.draw(self.plane.key_image, self.x, self.y)
+    love.graphics.setColor(unpack(original_color))
   end
   return new_carryable(x, y, 'planar_key', {to_plane = plane, draw = draw})
 end
