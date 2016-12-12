@@ -413,6 +413,7 @@ function love.load(args)
 
   state.receptacles = {}
   lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140, state.planes.lab))
+  lume.push(state.receptacles, new_anchor(player.x, player.y - 80, 140, state.planes.gold))
 end
 
 function love.update(dt)
