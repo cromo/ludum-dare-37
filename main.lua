@@ -335,7 +335,7 @@ local function new_carryable(x, y, type, properties, plane)
           local highest_layer = find_highest_layer(self)
           if self.active then
             --- If layer is collapsing, then:
-            if not self.parented and layer.removing then
+            if not self.parented and layer.removing and highest_layer.plane ~= layer.plane then
               self.active = false
             else
               self.plane = highest_layer.plane
@@ -401,7 +401,7 @@ local function new_receptacle(x, y, properties, hold, unparent, plane)
           local layer = object
           self.active_layers[layer] = layer
           local highest_layer = find_highest_layer(self)
-          if self.plane == highest_layer.plane then
+          if self.plane == highest_layer.plane or (self.holding and self.holding.to_plane and self.holding.to_plane == highest_layer.plane) then
             self.active = true
           else
             self.active = false
@@ -550,6 +550,7 @@ function love.load(args)
 
   state.carryables = {}
   lume.push(state.carryables, new_planar_key(player.x - 30, player.y, state.planes.lab))
+  lume.push(state.carryables, new_planar_key(player.x - 30, player.y + 16, state.planes.volcano))
 
   state.receptacles = {}
   lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140, state.planes.lab))
