@@ -32,6 +32,7 @@ local player = {
     vertical = {}
   },
   carry = {
+    type = 'player_reach',
     onBeginContactWith = function(self, object)
       if not object.type then return end
       if carryables[object.type] then

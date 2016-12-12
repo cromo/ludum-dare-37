@@ -279,11 +279,25 @@ function world_end_contact(a, b, coll)
 end
 
 local function new_carryable(x, y, type, properties)
-  local update = function(self)
-    self.x, self.y = self.body:getPosition()
-  end
-  local draw = function(self) end
-  local carryable = lume.merge({x = x, y = y, type = type, update = update, draw = draw, parented = false}, properties)
+  local carryable = lume.merge({
+      x = x,
+      y = y,
+      type = type,
+      onBeginContactWith = function(self, object)
+        lume.trace('carryable touched', object.type)
+        if object.type == 'layer' then
+          lume.trace 'touched layer, should recalculate layer'
+        end
+      end,
+      onEndContactWith = function(self, object)
+        lume.trace('carryable stopped touching', object.type)
+      end,
+      update = function(self)
+        self.x, self.y = self.body:getPosition()
+      end,
+      draw = function() end,
+      parented = false,
+      active_layers = {}}, properties)
   carryable.body = love.physics.newBody(state.world, carryable.x, carryable.y, "kinematic")
   carryable.body:setFixedRotation(true)
   local carryable_shape = love.physics.newCircleShape(8, 12, 6)
