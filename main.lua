@@ -289,7 +289,7 @@ local function new_carryable(x, y, type, properties)
         end
       end,
       onEndContactWith = function(self, object)
-        lume.trace('carryable stopped touching', object.type)
+        -- lume.trace('carryable stopped touching', object.type)
       end,
       update = function(self)
         self.x, self.y = self.body:getPosition()
@@ -354,6 +354,25 @@ local function new_anchor(x, y, radius, origin_plane)
   return new_receptacle(x, y, {radius = radius, plane = origin_plane, draw = draw}, hold, unparent)
 end
 
+local function new_spitter(x, y, direction)
+  local rotation = {
+    down = 0,
+    left = math.pi / 2,
+    up = math.pi,
+    right = 3 * math.pi / 2,
+  }
+  local spitter = {
+    x = x,
+    y = y,
+    facing = direction,
+    draw = function(self)
+      local image = assets['flame-spitter'].image
+      love.graphics.draw(image, self.x, self.y, rotation[direction], nil, nil, image:getWidth() / 2, image:getHeight() / 2)
+    end,
+  }
+  return spitter
+end
+
 function love.load(args)
   state.debug = lume.find(args, '--debug')
 
@@ -413,6 +432,8 @@ function love.load(args)
   state.receptacles = {}
   lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140, state.planes.lab))
   lume.push(state.receptacles, new_anchor(player.x, player.y - 80, 140, state.planes.gold))
+
+  state.spitter = new_spitter(player.x - 30, player.y - 2.5 * 16, 'down')
 end
 
 function love.update(dt)
@@ -510,6 +531,8 @@ function love.draw()
 
   local draw_list = lume.concat({state.player}, lume.filter(state.carryables, f'x -> not x.parented'), state.receptacles)
   lume.each(lume.sort(draw_list, 'y'), 'draw')
+
+  state.spitter:draw()
 
   debug_physics(state.world)
 
