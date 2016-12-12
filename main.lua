@@ -325,7 +325,10 @@ local function new_anchor(x, y, radius, origin_plane)
   end
   local function draw(self)
     love.graphics.draw(assets.anchor_base.image, self.x, self.y - 16)
-    love.graphics.draw(self.plane.anchor_detail, self.x, self.y - 16)
+    local color = {love.graphics.getColor()}
+    love.graphics.setColor(unpack(self.plane.color))
+    love.graphics.draw(assets.anchor_detail_white.image, self.x, self.y - 16)
+    love.graphics.setColor(unpack(color))
     if self.holding then
       self.holding:draw(self.x, self.y - 24)
     end
@@ -333,7 +336,9 @@ local function new_anchor(x, y, radius, origin_plane)
   return new_receptacle(x, y, {radius = radius, plane = origin_plane, draw = draw}, hold, unparent)
 end
 
-function love.load()
+function love.load(args)
+  state.debug = lume.find(args, '--debug')
+
   love.graphics.setDefaultFilter('nearest', 'nearest')
 
   assets.register('png', sprites.Sheet.load)
@@ -431,6 +436,9 @@ function love.keyreleased(key)
 end
 
 function debug_physics(world)
+  if not state.debug then
+    return
+  end
   for _, body in pairs(state.world:getBodyList()) do
     for _, fixture in pairs(body:getFixtureList()) do
       local shape = fixture:getShape()
