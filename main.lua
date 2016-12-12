@@ -449,6 +449,7 @@ end
 local function new_anchor(x, y, radius, origin_plane)
   local function hold(self, object)
     self.holding = object
+    object.parented = true
     object.body:setPosition(self.body:getPosition())
     if object.type == 'planar_key' then
       local width = 16
@@ -547,23 +548,24 @@ function love.load(args)
   local instant = true
   pinch_layer(state.planes.reality, 0, 0, 32 * 16 * 2, instant) -- twice the width
   pinch_layer(state.planes.lab, 16 * 32 / 2, 16 * 32 / 2, 32 * 16 * 2, instant)
-  pinch_layer(state.planes.gold, 15.5 * tile_size, 24.5 * tile_size, 4 * tile_size)
 
   state.camera = {x=player.x, y=player.y}
 
   state.carryables = {}
   lume.push(state.carryables, new_planar_key(player.x - 30, player.y, state.planes.lab, state.planes.volcano))
   lume.push(state.carryables, new_planar_key(player.x - 30, player.y + 16, state.planes.volcano, state.planes.lab))
+  local gold_key = new_planar_key(0, 0, state.planes.gold, state.planes.gold)
+  lume.push(state.carryables, gold_key)
 
   state.receptacles = {}
   lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140, state.planes.lab))
-  lume.push(state.receptacles, new_anchor(player.x, player.y - 80, 140, state.planes.gold))
+  local final_anchor = new_anchor(player.x, player.y - 70, 4 * tile_size, state.planes.gold)
+  lume.push(state.receptacles, final_anchor)
+  final_anchor:hold(gold_key)
 
   for _, plane in pairs(state.planes) do
-    lume.trace('iterating through ', plane.name)
     if plane.map.layers.game_elements then
       for _, object in ipairs(plane.map.layers.game_elements.objects) do
-        lume.trace(object.type, object.properties.to, object.properties.start)
         if object.type == 'key' then
           lume.push(state.carryables, new_planar_key(
                       object.x - 8,

@@ -8,7 +8,7 @@ return {
   height = 32,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 1,
+  nextobjectid = 6,
   properties = {},
   tilesets = {
     {
@@ -169,6 +169,65 @@ return {
         6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
         6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
         11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13
+      }
+    },
+    {
+      type = "objectgroup",
+      name = "game_elements",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 1,
+          name = "",
+          type = "key",
+          shape = "rectangle",
+          x = 359,
+          y = 415,
+          width = 19,
+          height = 19,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["start"] = "lab",
+            ["to"] = "volcano"
+          }
+        },
+        {
+          id = 3,
+          name = "",
+          type = "key",
+          shape = "rectangle",
+          x = 360,
+          y = 463,
+          width = 19,
+          height = 19,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["start"] = "lab",
+            ["to"] = "mansion"
+          }
+        },
+        {
+          id = 4,
+          name = "",
+          type = "anchor",
+          shape = "rectangle",
+          x = 336,
+          y = 325,
+          width = 111,
+          height = 111,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["start"] = "lab"
+          }
+        }
       }
     }
   }
