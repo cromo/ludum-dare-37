@@ -498,6 +498,9 @@ function love.load(args)
   assets.register('lua', function(path) return sti.new(path, {'box2d'}) end)
   assets.load('assets')
 
+  love.window.setTitle("Pinch")
+  love.window.setIcon(assets['ghost-down'].image:getData())
+
   state.planes = planes()
 
   state.world = love.physics.newWorld(0, 0, false)
