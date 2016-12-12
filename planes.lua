@@ -18,10 +18,10 @@ local function init()
   end
 
   add_plane('reality', 'reality', {59,9,76}, 'key', 'anchor_detail_white')
-  add_plane('lab', 'lab', {255,255,255}, 'key', 'anchor_detail_white')
-  add_plane('gold', 'goald', {206,163,78}, 'key', 'anchor_detail_white')
-  add_plane('volcano', 'test1', {255,0,0}, 'key', 'anchor_detail_white')
-  add_plane('mansion', 'test2', {128,28,108}, 'key', 'anchor_detail_white')
+  add_plane('lab', 'lab', {52,152,219}, 'key', 'anchor_detail_white')
+  add_plane('gold', 'goald', {249,179,47}, 'key', 'anchor_detail_white')
+  add_plane('volcano', 'test1', {207,124,4}, 'key', 'anchor_detail_white')
+  add_plane('mansion', 'test2', {169,155,181}, 'key', 'anchor_detail_white')
 
   return planes
 end

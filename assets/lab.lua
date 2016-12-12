@@ -8,7 +8,7 @@ return {
   height = 32,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 8,
+  nextobjectid = 9,
   properties = {},
   tilesets = {
     {
@@ -241,6 +241,22 @@ return {
           visible = true,
           properties = {
             ["start"] = "lab"
+          }
+        },
+        {
+          id = 8,
+          name = "",
+          type = "key",
+          shape = "rectangle",
+          x = 191,
+          y = 446,
+          width = 19,
+          height = 19,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["start"] = "lab",
+            ["to"] = "lab"
           }
         }
       }
