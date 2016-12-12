@@ -76,6 +76,11 @@ end
 state = {
   time = 0,
 }
+
+function is_debug()
+  return state.debug
+end
+
 state.emitters = {
   delta_time = live.Emitter.new(update),
   raw_key_pressed = live.Emitter.new(pressed_raw),
@@ -101,12 +106,12 @@ state.machines = {
         {released_raw, is_key(left), emit(state.emitters.key_released, left), playing},
         {released_raw, is_key(right), emit(state.emitters.key_released, right), playing},
         {pressed_raw, is_key 'space', emit(state.emitters.key_pressed, 'carry'), playing},
-        {pressed_raw, is_key 'q', function() pinch_layer(state.planes.lab, state.player.x, state.player.y, 50) end},
-        {pressed_raw, is_key 'w', function() pinch_layer(state.planes.volcano, state.player.x, state.player.y, 50) end},
-        {pressed_raw, is_key 'e', function() pinch_layer(state.planes.mansion, state.player.x, state.player.y, 50) end},
-        {pressed_raw, is_key 'k', function() release_pinch(#lume.reject(state.layers, f'x -> x.removing')) end},
-        {pressed_raw, is_key '1', function() state.player:switch_to_plane(state.planes.volcano) end},
-        {pressed_raw, is_key '2', function() state.player:switch_to_plane(state.planes.mansion) end},
+        {pressed_raw, {is_debug, is_key 'q'}, function() pinch_layer(state.planes.lab, state.player.x, state.player.y, 50) end},
+        {pressed_raw, {is_debug, is_key 'w'}, function() pinch_layer(state.planes.volcano, state.player.x, state.player.y, 50) end},
+        {pressed_raw, {is_debug, is_key 'e'}, function() pinch_layer(state.planes.mansion, state.player.x, state.player.y, 50) end},
+        {pressed_raw, {is_debug, is_key 'k'}, function() release_pinch(#lume.reject(state.layers, f'x -> x.removing')) end},
+        {pressed_raw, {is_debug, is_key '1'}, function() state.player:switch_to_plane(state.planes.volcano) end},
+        {pressed_raw, {is_debug, is_key '2'}, function() state.player:switch_to_plane(state.planes.mansion) end},
       }
     },
   },
@@ -230,9 +235,13 @@ end
 function release_pinch(layer)
   layer = layer or #state.layers
   if type(layer) == 'number' then
-    layer = state.layers[number]
+    layer = state.layers[layer]
   end
   if layer == state.layers[1] then
+    return
+  end
+  if layer.removing then
+    -- the layer is already on its way out
     return
   end
   layer.removing = true
