@@ -75,7 +75,12 @@ end
 
 state = {
   time = 0,
+  collision_categories = {}
 }
+
+state.collision_categories.default = 1
+state.collision_categories.plane_static = 2
+state.collision_categories.layer_sensor = 3
 
 function is_debug()
   return state.debug
@@ -227,6 +232,7 @@ function pinch_layer(target, x, y, radius, instant)
   local collision_circle = love.physics.newCircleShape(0, 0, radius)
   layer.fixture = love.physics.newFixture(layer.body, collision_circle, 1)
   layer.fixture:setSensor(true)
+  layer.fixture:setCategory(state.collision_categories.layer_sensor)
   layer.fixture:setUserData(layer)
 
   return layer
@@ -278,21 +284,78 @@ function world_end_contact(a, b, coll)
   end
 end
 
+find_highest_layer = function(object)
+  local highest = -1
+  local highest_layer = nil
+  for _, layer in pairs(object.active_layers) do
+    if layer:index() > highest then
+      highest = layer:index()
+      highest_layer = layer
+    end
+  end
+  if highest_layer then
+    return highest_layer
+  else
+    print("Couldn't find layer to bubble to! This shouldn't happen.")
+    return nil
+  end
+end
+
 local function new_carryable(x, y, type, properties)
   local carryable = lume.merge({
       x = x,
       y = y,
       type = type,
+      active_layers = {},
+      active = true,
+      plane = state.planes.reality,
       onBeginContactWith = function(self, object)
         if object.type == "layer" then
-          
+          local layer = object
+          self.active_layers[layer] = layer
+          --- Bubble to top layer
+          local highest_layer = find_highest_layer(self)
+          if self.active then
+            self.plane = highest_layer.plane
+          else
+            if highest_layer.plane == self.plane then
+              self.active = true
+            end
+          end
         end
       end,
       onEndContactWith = function(self, object)
-        -- lume.trace('carryable stopped touching', object.type)
+        if object.type == "layer" then
+          local layer = object
+          self.active_layers[layer] = nil
+          --- Bubble to top layer
+          local highest_layer = find_highest_layer(self)
+          if self.active then
+            --- If layer is collapsing, then:
+            if layer.removing then
+              self.active = false
+            else
+              self.plane = highest_layer.plane
+            end
+          else
+            if highest_layer.plane == self.plane then
+              self.active = true
+            end
+          end
+        end
       end,
       update = function(self)
-        self.x, self.y = self.body:getPosition()
+        if self.active then
+          self.x, self.y = self.body:getPosition()
+          self.visible = true
+          self.fixture:setSensor(false)
+          self.fixture:setMask()
+        else
+          self.visible = false
+          self.fixture:setSensor(true)
+          self.body:setLinearVelocity(0,0)
+          self.fixture:setMask(state.collision_categories.default, state.collision_categories.plane_static)
+        end
       end,
       draw = function() end,
       parented = false,
@@ -301,6 +364,7 @@ local function new_carryable(x, y, type, properties)
   carryable.body:setFixedRotation(true)
   local carryable_shape = love.physics.newCircleShape(8, 12, 6)
   carryable.fixture = love.physics.newFixture(carryable.body, carryable_shape, 1)
+  carryable.fixture:setCategory(state.collision_categories.default)
   carryable.fixture:setUserData(carryable)
   return carryable
 end
@@ -324,6 +388,7 @@ local function new_receptacle(x, y, properties, hold, unparent)
   local receptacle_shape = love.physics.newCircleShape(8, 12, 6)
   receptacle.fixture = love.physics.newFixture(receptacle.body, receptacle_shape, 1)
   receptacle.fixture:setUserData(receptacle)
+  receptacle.fixture:setCategory(state.collision_categories.default)
   return receptacle
 end
 
@@ -400,7 +465,7 @@ function love.load(args)
       for _, fixture in pairs(body:getFixtureList()) do
         if fixture:getGroupIndex() == 0 then
           fixture:setGroupIndex(plane.group)
-          fixture:setCategory(2)
+          fixture:setCategory(state.collision_categories.plane_static)
         end
       end
     end
@@ -530,7 +595,11 @@ function love.draw()
   love.graphics.setShader()
 
   local draw_list = lume.concat({state.player}, lume.filter(state.carryables, f'x -> not x.parented'), state.receptacles)
-  lume.each(lume.sort(draw_list, 'y'), 'draw')
+  lume.each(lume.sort(draw_list, 'y'), function(object)
+    if object.visible == nil or object.visible ~= false then
+      object:draw()
+    end
+  end)
 
   state.spitter:draw()
 

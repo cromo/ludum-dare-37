@@ -76,13 +76,16 @@ local player = {
     local origin_point = love.physics.newCircleShape(8, 12, 6.0)
     self.fixture = love.physics.newFixture(self.body, origin_point, 1)
     self.fixture:setGroupIndex(self.plane.group)
-    self.fixture:setMask(2)
+    -- Don't collide with most plane statics (the group overrides this)
+    self.fixture:setMask(state.collision_categories.plane_static)
     self.fixture:setUserData(self)
+    self.fixture:setCategory(state.collision_categories.default)
 
     local reachable_range = love.physics.newCircleShape(8, 8, 6)
     self.reach = love.physics.newFixture(self.body, reachable_range, 1)
     self.reach:setSensor(true)
     self.reach:setUserData(self.carry)
+    self.reach:setCategory(state.collision_categories.default)
   end,
   bubble_to_highest_layer = function(self)
     local highest = -1
