@@ -310,7 +310,7 @@ local function new_carryable(x, y, type, properties, plane)
       y = y,
       type = type,
       active_layers = {},
-      active = true,
+      active = false,
       plane = plane or state.planes.reality,
       onBeginContactWith = function(self, object)
         if object.type == "layer" then
@@ -372,7 +372,7 @@ local function new_carryable(x, y, type, properties, plane)
   return carryable
 end
 
-local function new_planar_key(x, y, plane)
+local function new_planar_key(x, y, to_plane, initial_plane)
   local function draw(self, x, y)
     local original_color = {love.graphics.getColor()}
     love.graphics.setColor(unpack(self.to_plane.color))
@@ -384,7 +384,7 @@ local function new_planar_key(x, y, plane)
     love.graphics.draw(self.plane.key_image, self.x, self.y)
     love.graphics.setColor(unpack(original_color))
   end
-  return new_carryable(x, y, 'planar_key', {to_plane = plane, draw = draw})
+  return new_carryable(x, y, 'planar_key', {to_plane = to_plane, draw = draw}, initial_plane)
 end
 
 local function new_receptacle(x, y, properties, hold, unparent, plane)
@@ -549,8 +549,8 @@ function love.load(args)
   state.camera = {x=player.x, y=player.y}
 
   state.carryables = {}
-  lume.push(state.carryables, new_planar_key(player.x - 30, player.y, state.planes.lab))
-  lume.push(state.carryables, new_planar_key(player.x - 30, player.y + 16, state.planes.volcano))
+  lume.push(state.carryables, new_planar_key(player.x - 30, player.y, state.planes.lab, state.planes.volcano))
+  lume.push(state.carryables, new_planar_key(player.x - 30, player.y + 16, state.planes.volcano, state.planes.lab))
 
   state.receptacles = {}
   lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140, state.planes.lab))
