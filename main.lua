@@ -512,6 +512,9 @@ function love.load(args)
     local map = assets[plane.map_name]
     plane.map = map
     plane.map:box2d_init(state.world)
+    if plane.map.layers.game_elements then
+      plane.map.layers.game_elements.visible = false
+    end
     plane.prerender = love.graphics.newCanvas(map.width * map.tilewidth, map.height * map.tileheight)
     plane.prerender:renderTo(function() plane.map:draw() end)
 
@@ -555,6 +558,30 @@ function love.load(args)
   state.receptacles = {}
   lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140, state.planes.lab))
   lume.push(state.receptacles, new_anchor(player.x, player.y - 80, 140, state.planes.gold))
+
+  for _, plane in pairs(state.planes) do
+    lume.trace('iterating through ', plane.name)
+    if plane.map.layers.game_elements then
+      for _, object in ipairs(plane.map.layers.game_elements.objects) do
+        lume.trace(object.type, object.properties.to, object.properties.start)
+        if object.type == 'key' then
+          lume.push(state.carryables, new_planar_key(
+                      object.x - 8,
+                      object.y - 12,
+                      state.planes[object.properties.to],
+                      state.planes[object.properties.start]))
+        end
+        if object.type == 'anchor' then
+          lume.push(state.receptacles, new_anchor(
+                      object.x + object.width / 2 - 6,
+                      object.y + object.height / 2,
+                      object.width / 2,
+                      state.planes[object.properties.start]
+          ))
+        end
+      end
+    end
+  end
 
   state.spitter = new_spitter(player.x - 30, player.y - 2.5 * 16, 'down')
 end
