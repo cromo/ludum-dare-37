@@ -335,7 +335,7 @@ local function new_carryable(x, y, type, properties, plane)
           local highest_layer = find_highest_layer(self)
           if self.active then
             --- If layer is collapsing, then:
-            if layer.removing then
+            if not self.parented and layer.removing then
               self.active = false
             else
               self.plane = highest_layer.plane

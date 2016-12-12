@@ -6,6 +6,7 @@ local function init()
   local next_group = 1
   local function add_plane(name, map, color, key, anchor)
     local plane = {
+      name = name,
       map_name = map,
       color = color,
       group = next_group,
