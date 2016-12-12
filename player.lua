@@ -167,6 +167,7 @@ local player = {
     -- Reposition carried object
     if self.carry.holding then
       local held = self.carry.holding
+      held.parented = true
       held.body:setPosition(self.x, self.y - 16)
     end
     if self.carry.dropping then
@@ -175,6 +176,7 @@ local player = {
       if self.carry.drop_target and not self.carry.drop_target.holding then
         self.carry.drop_target:hold(held)
       else
+        held.parented = false
         local put_offset = 12.5
         held.body:setPosition(
           self.x + put_offset * reach_offset[direction][1],
@@ -200,6 +202,9 @@ local player = {
       holding_offset = -10
     end
 
+    if self.carry.holding then
+      self.carry.holding:draw(x, y - 16)
+    end
     local hands_behind = direction == up
     if hands_behind then
       hands:draw(x, y - 1 + holding_offset)

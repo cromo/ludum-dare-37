@@ -4,22 +4,23 @@ local function init()
   local planes = {}
 
   local next_group = 1
-  local function add_plane(name, map, color, key)
+  local function add_plane(name, map, color, key, anchor)
     local plane = {
       map_name = map,
       color = color,
       group = next_group,
       key_image = assets[key].image,
+      anchor_detail = assets[anchor].image
     }
     next_group = next_group + 1
     planes[name] = plane
   end
 
-  add_plane('reality', 'reality', {0,0,0}, 'red-key')
-  add_plane('lab', 'lab', {192,192,192}, 'red-key')
-  add_plane('gold', 'goald', {179,128,22}, 'red-key')
-  add_plane('volcano', 'test1', {255,0,0}, 'red-key')
-  add_plane('mansion', 'test2', {128,128,128}, 'red-key')
+  add_plane('reality', 'reality', {0,0,0}, 'red-key', 'anchor_detail_white')
+  add_plane('lab', 'lab', {192,192,192}, 'red-key', 'anchor_detail_white')
+  add_plane('gold', 'goald', {179,128,22}, 'red-key', 'anchor_detail_white')
+  add_plane('volcano', 'test1', {255,0,0}, 'red-key', 'anchor_detail_white')
+  add_plane('mansion', 'test2', {128,128,128}, 'red-key', 'anchor_detail_white')
 
   return planes
 end

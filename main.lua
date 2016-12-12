@@ -278,7 +278,7 @@ local function new_carryable(x, y, type, properties)
     self.x, self.y = self.body:getPosition()
   end
   local draw = function(self) end
-  local carryable = lume.merge({x = x, y = y, type = type, update = update, draw = draw}, properties)
+  local carryable = lume.merge({x = x, y = y, type = type, update = update, draw = draw, parented = false}, properties)
   carryable.body = love.physics.newBody(state.world, carryable.x, carryable.y, "kinematic")
   carryable.body:setFixedRotation(true)
   local carryable_shape = love.physics.newCircleShape(8, 12, 6)
@@ -288,14 +288,19 @@ local function new_carryable(x, y, type, properties)
 end
 
 local function new_planar_key(x, y, plane)
-  local function draw(self)
-    love.graphics.draw(self.plane.key_image, self.x, self.y)
+  local function draw(self, x, y)
+    if not self.parented then
+      love.graphics.draw(self.plane.key_image, self.x, self.y)
+      return
+    end
+    love.graphics.draw(self.plane.key_image, x, y)
   end
   return new_carryable(x, y, 'planar_key', {plane = plane, draw = draw})
 end
 
 local function new_receptacle(x, y, properties, hold, unparent)
-  local receptacle = lume.merge({x = x, y = y, type = 'receptacle'}, properties, {hold = hold, unparent = unparent})
+  local draw = function(self) end
+  local receptacle = lume.merge({x = x, y = y, type = 'receptacle', draw = draw}, properties, {hold = hold, unparent = unparent})
   receptacle.body = love.physics.newBody(state.world, receptacle.x, receptacle.y, 'kinematic')
   receptacle.body:setFixedRotation(true)
   local receptacle_shape = love.physics.newCircleShape(8, 12, 6)
@@ -304,7 +309,7 @@ local function new_receptacle(x, y, properties, hold, unparent)
   return receptacle
 end
 
-local function new_anchor(x, y, radius)
+local function new_anchor(x, y, radius, origin_plane)
   local function hold(self, object)
     self.holding = object
     object.body:setPosition(self.body:getPosition())
@@ -318,7 +323,14 @@ local function new_anchor(x, y, radius)
     self.pinch = nil
     self.holding = nil
   end
-  return new_receptacle(x, y, {radius = radius}, hold, unparent)
+  local function draw(self)
+    love.graphics.draw(assets.anchor_base.image, self.x, self.y - 16)
+    love.graphics.draw(self.plane.anchor_detail, self.x, self.y - 16)
+    if self.holding then
+      self.holding:draw(self.x, self.y - 24)
+    end
+  end
+  return new_receptacle(x, y, {radius = radius, plane = origin_plane, draw = draw}, hold, unparent)
 end
 
 function love.load()
@@ -376,7 +388,7 @@ function love.load()
   lume.push(state.carryables, new_planar_key(player.x - 30, player.y, state.planes.lab))
 
   state.receptacles = {}
-  lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140))
+  lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140, state.planes.lab))
 end
 
 function love.update(dt)
@@ -471,6 +483,7 @@ function love.draw()
   state.player:draw()
 
   lume.each(state.carryables, 'draw')
+  lume.each(state.receptacles, 'draw')
 
   debug_physics(state.world)
 
