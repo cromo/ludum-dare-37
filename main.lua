@@ -273,6 +273,54 @@ function world_end_contact(a, b, coll)
   end
 end
 
+local function new_carryable(x, y, type, properties)
+  local update = function(self)
+    self.x, self.y = self.body:getPosition()
+  end
+  local draw = function(self) end
+  local carryable = lume.merge({x = x, y = y, type = type, update = update, draw = draw}, properties)
+  carryable.body = love.physics.newBody(state.world, carryable.x, carryable.y, "kinematic")
+  carryable.body:setFixedRotation(true)
+  local carryable_shape = love.physics.newCircleShape(8, 12, 6)
+  carryable.fixture = love.physics.newFixture(carryable.body, carryable_shape, 1)
+  carryable.fixture:setUserData(carryable)
+  return carryable
+end
+
+local function new_planar_key(x, y, plane)
+  local function draw(self)
+    love.graphics.draw(self.plane.key_image, self.x, self.y)
+  end
+  return new_carryable(x, y, 'planar_key', {plane = plane, draw = draw})
+end
+
+local function new_receptacle(x, y, properties, hold, unparent)
+  local receptacle = lume.merge({x = x, y = y, type = 'receptacle'}, properties, {hold = hold, unparent = unparent})
+  receptacle.body = love.physics.newBody(state.world, receptacle.x, receptacle.y, 'kinematic')
+  receptacle.body:setFixedRotation(true)
+  local receptacle_shape = love.physics.newCircleShape(8, 12, 6)
+  receptacle.fixture = love.physics.newFixture(receptacle.body, receptacle_shape, 1)
+  receptacle.fixture:setUserData(receptacle)
+  return receptacle
+end
+
+local function new_anchor(x, y, radius)
+  local function hold(self, object)
+    self.holding = object
+    object.body:setPosition(self.body:getPosition())
+    if object.type == 'planar_key' then
+      local width = 16
+      self.pinch = pinch_layer(object.plane, self.x + width / 2, self.y, self.radius)
+    end
+  end
+  local function unparent(self)
+    release_pinch(self.pinch)
+    self.pinch = nil
+    self.holding = nil
+  end
+  return new_receptacle(x, y, {radius = radius}, hold, unparent)
+end
+
 function love.load()
   love.graphics.setDefaultFilter('nearest', 'nearest')
 
@@ -281,7 +329,7 @@ function love.load()
   assets.register('lua', function(path) return sti.new(path, {'box2d'}) end)
   assets.load('assets')
 
-  state.planes = planes
+  state.planes = planes()
 
   state.world = love.physics.newWorld(0, 0, false)
   for name, plane in pairs(state.planes) do
@@ -324,46 +372,11 @@ function love.load()
 
   state.camera = {x=player.x, y=player.y}
 
-  local key = {
-    x = player.x - 30,
-    y = player.y,
-    type = 'planar_key',
-    plane = planes.lab,
-  }
-  key.body = love.physics.newBody(state.world, key.x, key.y, "kinematic")
-  key.body:setFixedRotation(true)
-  local key_shape = love.physics.newCircleShape(8, 12, 6)
-  key.fixture = love.physics.newFixture(key.body, key_shape, 1)
-  key.fixture:setUserData(key)
-  state.key = key
+  state.carryables = {}
+  lume.push(state.carryables, new_planar_key(player.x - 30, player.y, state.planes.lab))
 
-  local anchor = {
-    x = player.x + 30,
-    y = player.y,
-    radius = 140,
-    type = 'receptacle',
-    holding = nil,
-    hold = function(self, object)
-      self.holding = object
-      object.body:setPosition(self.body:getPosition())
-      if object.type == 'planar_key' then
-        local width = 16
-        self.pinch = pinch_layer(object.plane, self.x + width / 2, self.y, self.radius)
-      end
-    end,
-    unparent = function(self)
-      -- TODO: unpinch here if needed
-      release_pinch(self.pinch)
-      self.pinch = nil
-      self.holding = nil
-    end,
-  }
-  anchor.body = love.physics.newBody(state.world, anchor.x, anchor.y, 'kinematic')
-  anchor.body:setFixedRotation(true)
-  local anchor_shape = love.physics.newCircleShape(8, 12, 6)
-  anchor.fixture = love.physics.newFixture(anchor.body, anchor_shape, 1)
-  anchor.fixture:setUserData(anchor)
-  state.anchor = anchor
+  state.receptacles = {}
+  lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140))
 end
 
 function love.update(dt)
@@ -381,6 +394,8 @@ function love.update(dt)
     state.player.carry,
     state.player,
   }
+
+  lume.each(state.carryables, 'update', dt)
 
   local follow_weight = 3.0 * dt
   state.camera.x = state.camera.x *
@@ -454,6 +469,8 @@ function love.draw()
   love.graphics.setColor(255, 255, 255)
   love.graphics.setShader()
   state.player:draw()
+
+  lume.each(state.carryables, 'draw')
 
   debug_physics(state.world)
 
