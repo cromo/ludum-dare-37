@@ -8,7 +8,7 @@ return {
   height = 32,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 6,
+  nextobjectid = 8,
   properties = {},
   tilesets = {
     {
@@ -218,10 +218,25 @@ return {
           name = "",
           type = "anchor",
           shape = "rectangle",
-          x = 336,
-          y = 325,
+          x = 241,
+          y = 382,
           width = 111,
           height = 111,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["start"] = "lab"
+          }
+        },
+        {
+          id = 6,
+          name = "",
+          type = "anchor",
+          shape = "ellipse",
+          x = 273,
+          y = 330,
+          width = 123,
+          height = 123,
           rotation = 0,
           visible = true,
           properties = {

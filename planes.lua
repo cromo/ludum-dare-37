@@ -17,7 +17,7 @@ local function init()
     planes[name] = plane
   end
 
-  add_plane('reality', 'reality', {0,0,0}, 'key', 'anchor_detail_white')
+  add_plane('reality', 'reality', {59,9,76}, 'key', 'anchor_detail_white')
   add_plane('lab', 'lab', {255,255,255}, 'key', 'anchor_detail_white')
   add_plane('gold', 'goald', {206,163,78}, 'key', 'anchor_detail_white')
   add_plane('volcano', 'test1', {255,0,0}, 'key', 'anchor_detail_white')

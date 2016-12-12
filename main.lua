@@ -547,7 +547,8 @@ function love.load(args)
   local tile_size = 16
   local instant = true
   pinch_layer(state.planes.reality, 0, 0, 32 * 16 * 2, instant) -- twice the width
-  pinch_layer(state.planes.lab, 16 * 32 / 2, 16 * 32 / 2, 32 * 16 * 2, instant)
+  -- pinch_layer(state.planes.lab, 16 * 32 / 2, 16 * 32 / 2, 32 * 16 * 2, instant)
+  pinch_layer(state.planes.lab, player.x + 8, player.y - 70, 32 * 16 * 2, instant)
 
   state.camera = {x=player.x, y=player.y}
 
@@ -562,6 +563,18 @@ function love.load(args)
   local final_anchor = new_anchor(player.x, player.y - 70, 4 * tile_size, state.planes.gold)
   lume.push(state.receptacles, final_anchor)
   final_anchor:hold(gold_key)
+  local original_unparent = final_anchor.unparent
+  final_anchor.unparent = function(self)
+    local reality = state.planes.reality
+    if self.holding.type == 'planar_key' then
+      self.holding.to_plane = reality
+    end
+    original_unparent(self)
+    for i, layer in ipairs(state.layers) do
+      release_pinch(layer)
+    end
+    self.plane = reality
+  end
 
   for _, plane in pairs(state.planes) do
     if plane.map.layers.game_elements then
