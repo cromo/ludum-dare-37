@@ -223,13 +223,14 @@ function pinch_layer(target, x, y, radius, instant)
   }
   if not instant then
     layer.radius = 1
-    flux.to(layer, 0.5, {radius = radius})
+    flux.to(layer, 0.5, {radius = radius}):onupdate(
+      function() layer.fixture:getShape():setRadius(layer.radius) end)
   end
   lume.push(state.layers, layer)
 
   layer.body = love.physics.newBody(state.world, x, y, "dynamic")
   layer.body:setFixedRotation(true)
-  local collision_circle = love.physics.newCircleShape(0, 0, radius)
+  local collision_circle = love.physics.newCircleShape(0, 0, layer.radius)
   layer.fixture = love.physics.newFixture(layer.body, collision_circle, 1)
   layer.fixture:setSensor(true)
   layer.fixture:setCategory(state.collision_categories.layer_sensor)
@@ -251,7 +252,9 @@ function release_pinch(layer)
     return
   end
   layer.removing = true
-  flux.to(layer, 0.3, {radius = 1}):oncomplete(function()
+  flux.to(layer, 0.3, {radius = 1}):onupdate(function()
+      layer.fixture:getShape():setRadius(layer.radius)
+  end):oncomplete(function()
       layer.fixture:destroy()
       local index = layer:index()
       table.remove(state.layers, index)
@@ -377,7 +380,7 @@ local function new_planar_key(x, y, plane)
     end
     love.graphics.draw(self.plane.key_image, self.x, self.y)
   end
-  return new_carryable(x, y, 'planar_key', {plane = plane, draw = draw})
+  return new_carryable(x, y, 'planar_key', {to_plane = plane, draw = draw})
 end
 
 local function new_receptacle(x, y, properties, hold, unparent, plane)
@@ -445,7 +448,7 @@ local function new_anchor(x, y, radius, origin_plane)
     object.body:setPosition(self.body:getPosition())
     if object.type == 'planar_key' then
       local width = 16
-      self.pinch = pinch_layer(object.plane, self.x + width / 2, self.y, self.radius)
+      self.pinch = pinch_layer(object.to_plane, self.x + width / 2, self.y, self.radius)
     end
   end
   local function unparent(self)
