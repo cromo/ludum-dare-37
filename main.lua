@@ -246,13 +246,9 @@ function release_pinch(layer)
   end
   layer.removing = true
   flux.to(layer, 0.3, {radius = 1}):oncomplete(function()
-      if not layer.fixture:isDestroyed() then
-        layer.fixture:destroy()
-      end
+      layer.fixture:destroy()
       local index = layer:index()
-      if index then
-        table.remove(state.layers, index)
-      end
+      table.remove(state.layers, index)
   end)
 end
 
