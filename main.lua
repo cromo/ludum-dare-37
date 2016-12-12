@@ -552,13 +552,13 @@ function love.load(args)
   state.camera = {x=player.x, y=player.y}
 
   state.carryables = {}
-  lume.push(state.carryables, new_planar_key(player.x - 30, player.y, state.planes.lab, state.planes.volcano))
-  lume.push(state.carryables, new_planar_key(player.x - 30, player.y + 16, state.planes.volcano, state.planes.lab))
+  -- lume.push(state.carryables, new_planar_key(player.x - 30, player.y, state.planes.lab, state.planes.volcano))
+  -- lume.push(state.carryables, new_planar_key(player.x - 30, player.y + 16, state.planes.volcano, state.planes.lab))
   local gold_key = new_planar_key(0, 0, state.planes.gold, state.planes.gold)
   lume.push(state.carryables, gold_key)
 
   state.receptacles = {}
-  lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140, state.planes.lab))
+  -- lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140, state.planes.lab))
   local final_anchor = new_anchor(player.x, player.y - 70, 4 * tile_size, state.planes.gold)
   lume.push(state.receptacles, final_anchor)
   final_anchor:hold(gold_key)
