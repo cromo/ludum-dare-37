@@ -289,11 +289,11 @@ end
 
 local function new_planar_key(x, y, plane)
   local function draw(self, x, y)
-    if not self.parented then
-      love.graphics.draw(self.plane.key_image, self.x, self.y)
+    if self.parented then
+      love.graphics.draw(self.plane.key_image, x, y)
       return
     end
-    love.graphics.draw(self.plane.key_image, x, y)
+    love.graphics.draw(self.plane.key_image, self.x, self.y)
   end
   return new_carryable(x, y, 'planar_key', {plane = plane, draw = draw})
 end
@@ -480,10 +480,9 @@ function love.draw()
 
   love.graphics.setColor(255, 255, 255)
   love.graphics.setShader()
-  state.player:draw()
 
-  lume.each(state.carryables, 'draw')
-  lume.each(state.receptacles, 'draw')
+  local draw_list = lume.concat({state.player}, lume.filter(state.carryables, f'x -> not x.parented'), state.receptacles)
+  lume.each(lume.sort(draw_list, 'y'), 'draw')
 
   debug_physics(state.world)
 
