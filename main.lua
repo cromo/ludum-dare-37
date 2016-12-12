@@ -301,14 +301,14 @@ find_highest_layer = function(object)
   end
 end
 
-local function new_carryable(x, y, type, properties)
+local function new_carryable(x, y, type, properties, plane)
   local carryable = lume.merge({
       x = x,
       y = y,
       type = type,
       active_layers = {},
       active = true,
-      plane = state.planes.reality,
+      plane = plane or state.planes.reality,
       onBeginContactWith = function(self, object)
         if object.type == "layer" then
           local layer = object
@@ -380,9 +380,56 @@ local function new_planar_key(x, y, plane)
   return new_carryable(x, y, 'planar_key', {plane = plane, draw = draw})
 end
 
-local function new_receptacle(x, y, properties, hold, unparent)
+local function new_receptacle(x, y, properties, hold, unparent, plane)
   local draw = function(self) end
-  local receptacle = lume.merge({x = x, y = y, type = 'receptacle', draw = draw}, properties, {hold = hold, unparent = unparent})
+  local receptacle = lume.merge({
+      x = x,
+      y = y,
+      type = 'receptacle',
+      active_layers = {},
+      active = false,
+      plane = plane or state.planes.lab,
+      onBeginContactWith = function(self, object)
+        if object.type == 'layer' then
+          local layer = object
+          self.active_layers[layer] = layer
+          local highest_layer = find_highest_layer(self)
+          if self.plane == highest_layer.plane then
+            self.active = true
+          else
+            self.active = false
+          end
+        end
+      end,
+      onEndContactWith = function(self, object)
+        if object.type == 'layer' then
+          local layer = object
+          self.active_layers[layer] = nil
+          local highest_layer = find_highest_layer(self)
+          if self.plane == highest_layer.plane then
+            self.active = true
+          else
+            self.active = false
+          end
+        end
+      end,
+      update = function(self)
+        if self.active then
+          self.x, self.y = self.body:getPosition()
+          self.visible = true
+          self.fixture:setSensor(false)
+          self.fixture:setMask()
+        else
+          self.visible = false
+          self.fixture:setSensor(true)
+          self.body:setLinearVelocity(0,0)
+          self.fixture:setMask(state.collision_categories.default, state.collision_categories.plane_static)
+        end
+      end,
+      draw = draw},
+    properties, {
+      hold = hold,
+      unparent = unparent})
   receptacle.body = love.physics.newBody(state.world, receptacle.x, receptacle.y, 'kinematic')
   receptacle.body:setFixedRotation(true)
   local receptacle_shape = love.physics.newCircleShape(8, 12, 6)
@@ -518,6 +565,7 @@ function love.update(dt)
   }
 
   lume.each(state.carryables, 'update', dt)
+  lume.each(state.receptacles, 'update', dt)
 
   local follow_weight = 3.0 * dt
   state.camera.x = state.camera.x *
@@ -601,7 +649,7 @@ function love.draw()
     end
   end)
 
-  state.spitter:draw()
+  -- state.spitter:draw()
 
   debug_physics(state.world)
 
