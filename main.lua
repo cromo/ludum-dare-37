@@ -222,7 +222,7 @@ function pinch_layer(target, x, y, radius, instant)
   end
   lume.push(state.layers, layer)
 
-  layer.body = love.physics.newBody(state.world, x, y, "static")
+  layer.body = love.physics.newBody(state.world, x, y, "dynamic")
   layer.body:setFixedRotation(true)
   local collision_circle = love.physics.newCircleShape(0, 0, radius)
   layer.fixture = love.physics.newFixture(layer.body, collision_circle, 1)
@@ -284,9 +284,8 @@ local function new_carryable(x, y, type, properties)
       y = y,
       type = type,
       onBeginContactWith = function(self, object)
-        lume.trace('carryable touched', object.type)
-        if object.type == 'layer' then
-          lume.trace 'touched layer, should recalculate layer'
+        if object.type == "layer" then
+          
         end
       end,
       onEndContactWith = function(self, object)
