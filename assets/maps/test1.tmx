@@ -66,9 +66,80 @@
  </tileset>
  <tileset firstgid="16" name="Bottomless Pit" tilewidth="16" tileheight="16" tilecount="15" columns="5">
   <image source="../the-pits.png" width="80" height="48"/>
+  <tile id="0">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="4">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
   <tile id="6">
    <properties>
-    <property name="sensor" type="bool" value="true"/>
+    <property name="collidable" type="bool" value="true"/>
+    <property name="sensor" type="bool" value="false"/>
+   </properties>
+  </tile>
+  <tile id="7">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="9">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="10">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="11">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="12">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="14">
+   <properties>
+    <property name="collidable" type="bool" value="true"/>
    </properties>
   </tile>
  </tileset>
@@ -84,9 +155,9 @@
  <layer name="Tile Layer 1" width="32" height="32">
   <data encoding="csv">
 1,2,2,2,2,2,2,2,2,2,2,3,22,22,22,1,2,2,2,2,3,1,2,2,2,2,2,2,2,2,2,3,
-6,7,7,7,7,7,7,7,7,7,7,8,22,22,22,6,16,17,17,18,8,6,7,7,7,7,7,7,7,7,7,8,
-6,7,7,7,7,7,7,7,7,7,7,8,22,22,22,6,21,22,22,23,8,6,7,7,7,7,7,7,7,7,7,8,
-6,7,7,31,32,32,33,7,7,7,7,8,22,22,22,6,21,22,22,23,8,6,7,7,7,7,7,7,7,7,7,8,
+6,7,7,7,7,7,7,7,7,7,7,8,22,22,22,6,16,17,17,18,8,6,7,7,7,31,35,35,35,35,35,8,
+6,7,7,7,7,7,7,7,7,7,7,8,22,22,22,6,21,22,22,23,8,6,7,7,7,37,38,39,31,35,35,8,
+6,7,7,31,32,32,33,7,7,7,7,8,22,22,22,6,21,22,22,23,8,6,7,7,7,7,7,7,37,38,38,8,
 6,7,7,34,35,35,36,7,7,7,7,8,22,22,22,6,21,22,22,23,8,6,7,7,7,7,7,7,7,7,7,8,
 6,7,7,37,38,38,39,7,7,7,7,5,2,2,2,4,21,22,22,23,8,6,7,7,7,7,7,7,7,7,7,8,
 6,7,7,7,7,7,31,32,32,33,7,7,7,7,7,16,19,22,22,23,8,6,7,7,7,7,7,7,7,7,7,8,

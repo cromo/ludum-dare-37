@@ -8,7 +8,7 @@ return {
   height = 32,
   tilewidth = 16,
   tileheight = 16,
-  nextobjectid = 13,
+  nextobjectid = 17,
   properties = {},
   tilesets = {
     {
@@ -260,8 +260,8 @@ return {
         6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
         6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
         6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
-        6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
-        6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
+        6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 10, 9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
+        6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 5, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
         6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
         6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
         6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
@@ -397,6 +397,68 @@ return {
           visible = true,
           properties = {
             ["start"] = "mansion"
+          }
+        },
+        {
+          id = 13,
+          name = "",
+          type = "anchor",
+          shape = "ellipse",
+          x = -8,
+          y = -247,
+          width = 773,
+          height = 773,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["start"] = "mansion"
+          }
+        },
+        {
+          id = 14,
+          name = "",
+          type = "key",
+          shape = "rectangle",
+          x = 440,
+          y = 42,
+          width = 19,
+          height = 19,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["start"] = "mansion",
+            ["to"] = "volcano"
+          }
+        },
+        {
+          id = 15,
+          name = "",
+          type = "anchor",
+          shape = "ellipse",
+          x = 66,
+          y = 307,
+          width = 192,
+          height = 192,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["start"] = "volcano"
+          }
+        },
+        {
+          id = 16,
+          name = "",
+          type = "key",
+          shape = "rectangle",
+          x = 109,
+          y = 393,
+          width = 19,
+          height = 19,
+          rotation = 0,
+          visible = true,
+          properties = {
+            ["start"] = "volcano",
+            ["to"] = "gold"
           }
         }
       }
