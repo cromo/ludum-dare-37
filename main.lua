@@ -560,7 +560,7 @@ function love.load(args)
 
   state.receptacles = {}
   -- lume.push(state.receptacles, new_anchor(player.x + 30, player.y, 140, state.planes.lab))
-  local final_anchor = new_anchor(player.x, player.y - 70, 4 * tile_size, state.planes.gold)
+  local final_anchor = new_anchor(player.x, player.y - 70, 3.4 * tile_size, state.planes.gold)
   lume.push(state.receptacles, final_anchor)
   final_anchor:hold(gold_key)
   local original_unparent = final_anchor.unparent
